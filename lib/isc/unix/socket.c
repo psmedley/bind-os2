@@ -254,11 +254,20 @@ typedef enum { poll_idle, poll_active, poll_checking } pollstate_t;
  * from recv() but will have errno==0.  This is broken, but we have to
  * work around it here.
  */
+#ifndef __OS2__
 #define SOFT_ERROR(e)	((e) == EAGAIN || \
 			 (e) == EWOULDBLOCK || \
 			 (e) == ENOBUFS || \
 			 (e) == EINTR || \
 			 (e) == 0)
+#else
+#define SOFT_ERROR(e)	((e) == EAGAIN || \
+			 (e) == EWOULDBLOCK || \
+			 (e) == EFAULT || \
+			 (e) == ENOBUFS || \
+			 (e) == EINTR || \
+			 (e) == 0)
+#endif
 
 #define DLVL(x) ISC_LOGCATEGORY_GENERAL, ISC_LOGMODULE_SOCKET, ISC_LOG_DEBUG(x)
 
@@ -2024,7 +2033,16 @@ doio_recv(isc__socket_t *sock, isc_socketevent_t *dev) {
 	}
 
 	if (sock->type == isc_sockettype_udp) {
+#ifdef __INNOTEK_LIBC__
+                if (dev->address.type.sa.sa_family == AF_INET)
+                        dev->address.length = sizeof(struct sockaddr_in);   
+                else if (dev->address.type.sa.sa_family == AF_INET6)
+                        dev->address.length = sizeof(struct sockaddr_in6);
+                else
+                        dev->address.length = msghdr.msg_namelen;
+#else
 		dev->address.length = msghdr.msg_namelen;
+#endif
 		if (isc_sockaddr_getport(&dev->address) == 0) {
 			if (isc_log_wouldlog(isc_lctx, IOEVENT_LEVEL)) {
 				socket_log(sock, &dev->address, IOEVENT,
@@ -4774,7 +4792,11 @@ isc__socketmgr_create2(isc_mem_t *mctx, isc_socketmgr_t **managerp,
 	 * Create the special fds that will be used to wake up the
 	 * select/poll loop when something internal needs to be done.
 	 */
+#ifdef __KLIBC__ 
+        if (socketpair(AF_UNIX, SOCK_STREAM, 0, manager->pipe_fds) != 0) { 
+#else 
 	if (pipe(manager->pipe_fds) != 0) {
+#endif
 		isc__strerror(errno, strbuf, sizeof(strbuf));
 		UNEXPECTED_ERROR(__FILE__, __LINE__,
 				 "pipe() %s: %s",
@@ -6605,6 +6627,7 @@ isc__socketmgr_waitevents(isc_socketmgr_t *manager0, struct timeval *tvp,
 
 	n = select(swait_private.maxfd, swait_private.readset,
 		   swait_private.writeset, NULL, tvp);
+fprintf(stderr,"select returned %d\n",n);
 #endif
 
 	*swaitp = &swait_private;

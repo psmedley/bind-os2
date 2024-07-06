@@ -2152,7 +2152,7 @@ ac_fn_c_check_func ()
 {
   as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $2" >&5
-$as_echo_n "checking for $2... " >&6; }
+ >&6; }
 if eval \${$3+:} false; then :
   $as_echo_n "(cached) " >&6
 else
@@ -24195,7 +24195,6 @@ BIND9_TOP_BUILDDIR=`pwd`
 
 
 
-
 if test "X$srcdir" != "X"; then
 	BIND9_ISC_BUILDINCLUDE="-I${BIND9_TOP_BUILDDIR}/lib/isc/include"
 	BIND9_ISCCC_BUILDINCLUDE="-I${BIND9_TOP_BUILDDIR}/lib/isccc/include"
@@ -24213,7 +24212,6 @@ else
 	BIND9_BIND9_BUILDINCLUDE=""
 	BIND9_IRS_BUILDINCLUDE=""
 fi
-
 
 BIND9_MAKE_INCLUDES=$BIND9_TOP_BUILDDIR/make/includes
 
@@ -24241,7 +24239,6 @@ if test -f "${srcdir}/srcid"; then
 elif test -d "${srcdir}/.git"; then
 	BIND9_SRCID="SRCID="`(cd "${srcdir}";git rev-parse --short HEAD)`
 fi
-
 
 
 if test -z "$ac_configure_args"; then
@@ -24330,6 +24327,8 @@ fi
 #
 case $host in #(
   *-sunos*) :
+    with_dlopen="no" ;; #(
+  *-os2-emx*) :
     with_dlopen="no" ;; #(
   *) :
      ;;

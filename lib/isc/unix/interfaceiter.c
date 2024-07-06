@@ -149,7 +149,7 @@ static void linux_if_inet6_first(isc_interfaceiter_t *iter);
 
 #if HAVE_GETIFADDRS
 #include "ifiter_getifaddrs.c"
-#elif HAVE_IFLIST_SYSCTL
+#elif (defined(HAVE_IFLIST_SYSCTL)&&!defined(__OS2__))
 #include "ifiter_sysctl.c"
 #else
 #include "ifiter_ioctl.c"

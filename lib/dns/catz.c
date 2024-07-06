@@ -40,6 +40,10 @@
 #define DNS_CATZ_ZONES_VALID(catzs) ISC_MAGIC_VALID(catzs, DNS_CATZ_ZONES_MAGIC)
 #define DNS_CATZ_ENTRY_VALID(entry) ISC_MAGIC_VALID(entry, DNS_CATZ_ENTRY_MAGIC)
 
+#ifdef __OS2__
+#define INET6_ADDRSTRLEN	(48)
+#endif
+
 /*%
  * Single member zone in a catalog
  */

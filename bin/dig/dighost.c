@@ -1482,6 +1482,13 @@ setup_system(bool ipv4only, bool ipv6only) {
 					lwresflags);
 	if (lwresult != LWRES_R_SUCCESS)
 		fatal("lwres_context_create failed");
+#ifdef __INNOTEK_LIBC__
+        const char *env_path; 
+        env_path=getenv("ETC"); 
+        char *resolv2_path = strcat(env_path, "\\resolv2");
+#undef RESOLV_CONF
+#define RESOLV_CONF resolv2_path
+#endif
 
 	lwresult = lwres_conf_parse(lwctx, RESOLV_CONF);
 	if (lwresult != LWRES_R_SUCCESS && lwresult != LWRES_R_NOTFOUND)

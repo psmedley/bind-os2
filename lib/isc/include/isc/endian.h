@@ -11,7 +11,7 @@
 
 #pragma once
 
-#if defined(__DragonFly__) || defined(__FreeBSD__) || \
+#if defined(__DragonFly__) || defined(__FreeBSD__) || defined(__KLIBC__) || \
     defined(__NetBSD__) || defined (__OpenBSD__) || defined(__bsdi__)
 
 # include <sys/endian.h>

@@ -13,7 +13,13 @@
 #include <config.h>
 
 #include <errno.h>
+
+#ifndef __OS2__
 #include <unistd.h>
+#else
+#include <io.h>
+#include <sys/fcntl.h>
+#endif
 
 #include <isc/stdio.h>
 #include <isc/stat.h>
@@ -28,6 +34,9 @@ isc_stdio_open(const char *filename, const char *mode, FILE **fp) {
 	f = fopen(filename, mode);
 	if (f == NULL)
 		return (isc__errno2result(errno));
+#ifdef __OS2__
+	setmode(f,O_TEXT);
+#endif
 	*fp = f;
 	return (ISC_R_SUCCESS);
 }

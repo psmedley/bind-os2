@@ -872,7 +872,11 @@ default_memalloc(void *arg, size_t size) {
 	}
 
 	/* cppcheck-suppress leakNoVarFunctionCall */
+#ifndef __OS2__
 	return (malloc(size));
+#else
+	return (_lmalloc(size));
+#endif
 }
 
 static void *

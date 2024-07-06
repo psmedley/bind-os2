@@ -14,6 +14,10 @@
 
 #include <isc/os.h>
 
+#ifdef __KLIBC__ 
+#define INCL_DOS 
+#include <os2.h> 
+#endif 
 
 #ifdef HAVE_SYSCONF
 
@@ -73,6 +77,8 @@ isc_os_ncpus(void) {
 
 #ifdef __hpux
 	ncpus = hpux_ncpus();
+#elif defined(__KLIBC__) 
+        DosQuerySysInfo(QSV_NUMPROCESSORS,QSV_NUMPROCESSORS,(PVOID)&ncpus, sizeof(ULONG)); 
 #elif defined(HAVE_SYSCONF)
 	ncpus = sysconf_ncpus();
 #endif

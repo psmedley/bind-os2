@@ -1122,8 +1122,10 @@ setup(void) {
 	 * because calling create_managers() will create threads, which
 	 * would be lost after fork().
 	 */
+#ifndef __INNOTEK_LIBC__
 	if (!ns_g_foreground)
 		ns_os_daemonize();
+#endif
 
 	/*
 	 * We call isc_app_start() here as some versions of FreeBSD's fork()

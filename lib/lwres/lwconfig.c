@@ -360,8 +360,14 @@ lwres_conf_parsedomain(lwres_context_t *ctx,  FILE *fp) {
 	confdata = &ctx->confdata;
 
 	res = getword(fp, word, sizeof(word));
+#ifndef __OS2__
 	if (strlen(word) == 0U)
 		return (LWRES_R_FAILURE); /* Nothing else on line. */
+#else
+	/* OS/2 dhcp client will sometimes write domain on a line with no actual domain */
+	if (strlen(word) == 0U)
+		return (LWRES_R_SUCCESS); /* Nothing else on line. */
+#endif
 	else if (res == ' ' || res == '\t')
 		res = eatwhite(fp);
 
@@ -388,7 +394,6 @@ lwres_conf_parsedomain(lwres_context_t *ctx,  FILE *fp) {
 
 	if (confdata->domainname == NULL)
 		return (LWRES_R_FAILURE);
-
 	return (LWRES_R_SUCCESS);
 }
 
@@ -630,7 +635,6 @@ lwres_conf_parse(lwres_context_t *ctx, const char *filename) {
 	errno = 0;
 	if ((fp = fopen(filename, "r")) == NULL)
 		return (LWRES_R_NOTFOUND);
-
 	ret = LWRES_R_SUCCESS;
 	do {
 		stopchar = getword(fp, word, sizeof(word));
@@ -639,15 +643,14 @@ lwres_conf_parse(lwres_context_t *ctx, const char *filename) {
 			POST(rval);
 			break;
 		}
-
 		if (strlen(word) == 0U)
 			rval = LWRES_R_SUCCESS;
 		else if (strcmp(word, "nameserver") == 0)
 			rval = lwres_conf_parsenameserver(ctx, fp);
 		else if (strcmp(word, "lwserver") == 0)
 			rval = lwres_conf_parselwserver(ctx, fp);
-		else if (strcmp(word, "domain") == 0)
-			rval = lwres_conf_parsedomain(ctx, fp);
+		else if (strcmp(word, "domain") == 0){
+			rval = lwres_conf_parsedomain(ctx, fp);}
 		else if (strcmp(word, "search") == 0)
 			rval = lwres_conf_parsesearch(ctx, fp);
 		else if (strcmp(word, "sortlist") == 0)

@@ -40,6 +40,12 @@
 #define ISC_SOCKADDR_LEN_T unsigned int
 #endif
 
+#ifdef __OS2__
+#ifdef WANT_IPV6
+#undef WANT_IPV6
+#endif /* WANT_IPV6 */
+#endif /* __OS2__ */
+
 /*%
  * Definitions about UDP port range specification.  This is a total mess of
  * portability variants: some use sysctl (but the sysctl names vary), some use

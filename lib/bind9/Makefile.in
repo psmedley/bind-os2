@@ -7,6 +7,11 @@
 # See the COPYRIGHT file distributed with this work for additional
 # information regarding copyright ownership.
 
+OS2_LA_NAME=bind9 
+OS2_DLL_NAME=bind9 
+OS2_DLL_OBJ=$(OBJS:%.lo=.libs/%.o) ../isccfg/.libs/isccfg.a ../dns/.libs/dns.a ../isccc/.libs/isccc.a ../isc/.libs/isc.a 
+OS2_DLL_LIBS= -lcrypto -lxml2 -lurpo -lpthread 
+
 srcdir =	@srcdir@
 VPATH =		@srcdir@
 top_srcdir =	@top_srcdir@
@@ -78,3 +83,18 @@ uninstall::
 
 clean distclean::
 	rm -f libbind9.@A@ timestamp
+
+$(OS2_DLL_NAME).dll: lib$(OS2_LA_NAME).la 
+	cp .libs/$(OS2_LA_NAME).a .libs/$(OS2_LA_NAME)_s.a 
+	echo "LIBRARY $(OS2_DLL_NAME) INITINSTANCE TERMINSTANCE" > $(OS2_DLL_NAME).def 
+	echo "DATA MULTIPLE" >> $(OS2_DLL_NAME).def 
+	echo "EXPORTS" >> $(OS2_DLL_NAME).def 
+	emxexp $(OS2_DLL_OBJ) >> $(OS2_DLL_NAME).def 
+	gcc -g -Zhigh-mem -Zomf -Zdll $(OS2_DLL_NAME).def -o $@ $(OS2_DLL_OBJ) $(OS2_DLL_LIBS)  
+	emximp -o .libs/$(OS2_LA_NAME).a $(OS2_DLL_NAME).def 
+	emximp -o .libs/$(OS2_LA_NAME).lib $(OS2_DLL_NAME).def 
+	# replace static libs with imports to bind9.dll 
+	cp -p .libs/$(OS2_LA_NAME).a ../isccfg/.libs/isccfg.a 
+	cp -p .libs/$(OS2_LA_NAME).a ../dns/.libs/dns.a 
+	cp -p .libs/$(OS2_LA_NAME).a ../isccc/.libs/isccc.a 
+	cp -p .libs/$(OS2_LA_NAME).a ../isc/.libs/isc.a 

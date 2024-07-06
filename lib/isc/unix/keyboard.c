@@ -29,6 +29,64 @@
 #include <isc/keyboard.h>
 #include <isc/util.h>
 
+#ifdef __KLIBC__ 
+
+#include <stdio.h> 
+
+isc_result_t 
+isc_keyboard_open(isc_keyboard_t *keyboard) { 
+        int fd; 
+ 
+        REQUIRE(keyboard != NULL); 
+
+        fd = fileno(stdin); 
+        if (fd < 0) 
+                return (ISC_R_IOERROR); 
+
+        keyboard->fd = fd; 
+
+        keyboard->result = ISC_R_SUCCESS; 
+
+        return (ISC_R_SUCCESS); 
+} 
+
+isc_result_t 
+isc_keyboard_close(isc_keyboard_t *keyboard, unsigned int sleeptime) { 
+        REQUIRE(keyboard != NULL); 
+
+        if (sleeptime > 0 && keyboard->result != ISC_R_CANCELED) 
+                (void)sleep(sleeptime); 
+
+        keyboard->fd = -1; 
+
+        return (ISC_R_SUCCESS); 
+} 
+
+isc_result_t 
+isc_keyboard_getchar(isc_keyboard_t *keyboard, unsigned char *cp) { 
+        ssize_t cc; 
+        unsigned char c; 
+
+        REQUIRE(keyboard != NULL); 
+        REQUIRE(cp != NULL); 
+
+        cc = read(keyboard->fd, &c, 1); 
+        if (cc < 0) { 
+                keyboard->result = ISC_R_IOERROR; 
+                return (keyboard->result); 
+        } 
+
+        *cp = c; 
+
+        return (ISC_R_SUCCESS); 
+} 
+
+bool
+isc_keyboard_canceled(isc_keyboard_t *keyboard) {
+	return (keyboard->result == ISC_R_CANCELED);
+}
+
+#else
 isc_result_t
 isc_keyboard_open(isc_keyboard_t *keyboard) {
 	int fd;
@@ -119,3 +177,4 @@ bool
 isc_keyboard_canceled(isc_keyboard_t *keyboard) {
 	return (keyboard->result == ISC_R_CANCELED);
 }
+#endif /* __KLIBC__ */

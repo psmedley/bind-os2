@@ -56,6 +56,12 @@
 #define UDPBUFFERS 1000
 #endif /* TUNE_LARGE */
 
+#ifdef __OS2__
+#ifdef WANT_IPV6
+#undef WANT_IPV6
+#endif /* WANT_IPV6 */
+#endif /* __OS2__ */
+
 #define IFMGR_MAGIC			ISC_MAGIC('I', 'F', 'M', 'G')
 #define NS_INTERFACEMGR_VALID(t)	ISC_MAGIC_VALID(t, IFMGR_MAGIC)
 

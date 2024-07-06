@@ -303,6 +303,39 @@ isc_file_renameunique(const char *file, char *templet) {
 	return (ISC_R_SUCCESS);
 }
 
+#ifdef __OS2__
+static isc_result_t
+openuniquemode(char *templet, int mode, bool binary, FILE **fp) {
+	int fd;
+	FILE *f;
+	isc_result_t result = ISC_R_SUCCESS;
+
+	REQUIRE(templet != NULL);
+	REQUIRE(fp != NULL && *fp == NULL);
+
+	fd = mkstemp(templet);
+
+	if (fd == -1)
+		result = isc__errno2result(errno);
+	if (result == ISC_R_SUCCESS) {
+#if 1
+		UNUSED(mode);
+#else
+		(void)fchmod(fd, mode);
+#endif
+		f = fdopen(fd, binary ? "wb+" : "w+");
+		if (f == NULL) {
+			result = isc__errno2result(errno);
+			(void)remove(templet);
+			(void)close(fd);
+		} else
+			*fp = f;
+	}
+
+	return (result);
+}
+#endif
+
 isc_result_t
 isc_file_openunique(char *templet, FILE **fp) {
 	int mode = S_IWUSR|S_IRUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH;
@@ -376,18 +409,30 @@ isc_file_openuniquemode(char *templet, int mode, FILE **fp) {
 isc_result_t
 isc_file_bopenunique(char *templet, FILE **fp) {
 	int mode = S_IWUSR|S_IRUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH;
+#ifndef __OS2__
 	return (isc_file_openuniquemode(templet, mode, fp));
+#else
+	return (openuniquemode(templet, mode, true, fp));
+#endif
 }
 
 isc_result_t
 isc_file_bopenuniqueprivate(char *templet, FILE **fp) {
 	int mode = S_IWUSR|S_IRUSR;
+#ifndef __OS2__
 	return (isc_file_openuniquemode(templet, mode, fp));
+#else
+	return (openuniquemode(templet, mode, true, fp));
+#endif
 }
 
 isc_result_t
 isc_file_bopenuniquemode(char *templet, int mode, FILE **fp) {
+#ifndef __OS2__
 	return (isc_file_openuniquemode(templet, mode, fp));
+#else
+	return (openuniquemode(templet, mode, true, fp));
+#endif
 }
 
 isc_result_t
@@ -482,7 +527,22 @@ isc_file_isdirectory(const char *filename) {
 bool
 isc_file_isabsolute(const char *filename) {
 	REQUIRE(filename != NULL);
+#ifndef __OS2__
 	return (filename[0] == '/');
++#else
+	/*
+	 * Look for c:\path\... style, c:/path/
+	 */
+
+	if (isalpha(filename[0]) && filename[1] == ':' && filename[2] == '\\')
+		return 1;
+	if (isalpha(filename[0]) && filename[1] == ':' && filename[2] == '/')
+		return 1;
+	if (filename[0] == '/' || filename[0] == '\\')
+		return 1;
+	return 0;
+#endif
+
 }
 
 bool

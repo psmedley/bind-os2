@@ -127,6 +127,10 @@
 #include <stdlib.h>
 #endif
 
+#ifdef __OS2__
+#define IN6ADDR_V4MAPPED_INIT 	{{ 0,0,0,0,0,0,0,0,0,0,0xff,0xff,0,0,0,0 }}
+#endif
+
 #ifdef HAVE_LMDB
 #include <lmdb.h>
 #define count_newzones count_newzones_db
@@ -7658,7 +7662,9 @@ load_configuration(const char *filename, ns_server_t *server,
 	/*
 	 * Set process limits, which (usually) needs to be done as root.
 	 */
+#ifndef __OS2__
 	set_limits(maps);
+#endif
 
 	/*
 	 * Check the process lockfile.
