@@ -1,6 +1,8 @@
 /*
  * Copyright (C) Internet Systems Consortium, Inc. ("ISC")
  *
+ * SPDX-License-Identifier: MPL-2.0
+ *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, you can obtain one at https://mozilla.org/MPL/2.0/.
@@ -9,9 +11,7 @@
  * information regarding copyright ownership.
  */
 
-
-#ifndef DNS_RDATATYPE_H
-#define DNS_RDATATYPE_H 1
+#pragma once
 
 /*! \file dns/rdatatype.h */
 
@@ -76,8 +76,7 @@ dns_rdatatype_tounknowntext(dns_rdatatype_t type, isc_buffer_t *target);
  */
 
 void
-dns_rdatatype_format(dns_rdatatype_t rdtype,
-		     char *array, unsigned int size);
+dns_rdatatype_format(dns_rdatatype_t rdtype, char *array, unsigned int size);
 /*%<
  * Format a human-readable representation of the type 'rdtype'
  * into the character array 'array', which is of size 'size'.
@@ -93,5 +92,3 @@ dns_rdatatype_format(dns_rdatatype_t rdtype,
  */
 
 ISC_LANG_ENDDECLS
-
-#endif /* DNS_RDATATYPE_H */

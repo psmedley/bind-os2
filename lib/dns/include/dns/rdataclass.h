@@ -1,6 +1,8 @@
 /*
  * Copyright (C) Internet Systems Consortium, Inc. ("ISC")
  *
+ * SPDX-License-Identifier: MPL-2.0
+ *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, you can obtain one at https://mozilla.org/MPL/2.0/.
@@ -9,9 +11,7 @@
  * information regarding copyright ownership.
  */
 
-
-#ifndef DNS_RDATACLASS_H
-#define DNS_RDATACLASS_H 1
+#pragma once
 
 /*! \file dns/rdataclass.h */
 
@@ -76,8 +76,7 @@ dns_rdataclass_tounknowntext(dns_rdataclass_t rdclass, isc_buffer_t *target);
  */
 
 void
-dns_rdataclass_format(dns_rdataclass_t rdclass,
-		      char *array, unsigned int size);
+dns_rdataclass_format(dns_rdataclass_t rdclass, char *array, unsigned int size);
 /*%<
  * Format a human-readable representation of the class 'rdclass'
  * into the character array 'array', which is of size 'size'.
@@ -90,5 +89,3 @@ dns_rdataclass_format(dns_rdataclass_t rdclass,
  */
 
 ISC_LANG_ENDDECLS
-
-#endif /* DNS_RDATACLASS_H */

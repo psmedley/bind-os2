@@ -1,8 +1,10 @@
 /*
  * Copyright (C) Internet Systems Consortium, Inc. ("ISC")
  *
+ * SPDX-License-Identifier: MPL-2.0
+ *
  * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * License, v. 2.0.  If a copy of the MPL was not distributed with this
  * file, you can obtain one at https://mozilla.org/MPL/2.0/.
  *
  * See the COPYRIGHT file distributed with this work for additional
@@ -11,7 +13,7 @@
 
 // NS5
 
-include "../../common/rndc.key";
+include "../../_common/rndc.key";
 
 controls {
 	inet 10.53.0.5 port @CONTROLPORT@ allow { any; } keys { rndc_key; };
@@ -25,13 +27,14 @@ options {
 	pid-file "named.pid";
 	listen-on { 10.53.0.5; };
 	listen-on-v6 { none; };
+	dnssec-validation no;
 	recursion no;
 	notify yes;
 	notify-delay 0;
 };
 
 zone "bits" {
-	type slave;
-	masters { 10.53.0.2; };
+	type secondary;
+	primaries { 10.53.0.2; };
 	file "bits.bk";
 };

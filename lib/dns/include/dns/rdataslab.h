@@ -1,6 +1,8 @@
 /*
  * Copyright (C) Internet Systems Consortium, Inc. ("ISC")
  *
+ * SPDX-License-Identifier: MPL-2.0
+ *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, you can obtain one at https://mozilla.org/MPL/2.0/.
@@ -9,9 +11,7 @@
  * information regarding copyright ownership.
  */
 
-
-#ifndef DNS_RDATASLAB_H
-#define DNS_RDATASLAB_H 1
+#pragma once
 
 /*! \file dns/rdataslab.h
  * \brief
@@ -52,12 +52,13 @@ ISC_LANG_BEGINDECLS
 #define DNS_RDATASLAB_FORCE 0x1
 #define DNS_RDATASLAB_EXACT 0x2
 
-#define DNS_RDATASLAB_OFFLINE 0x01 	/* RRSIG is for offline DNSKEY */
-#define DNS_RDATASLAB_WARNMASK 0x0E	/*%< RRSIG(DNSKEY) expired
-					 * warnings number mask. */
-#define DNS_RDATASLAB_WARNSHIFT 1	/*%< How many bits to shift to find
-					 * remaining expired warning number. */
-
+#define DNS_RDATASLAB_OFFLINE 0x01 /* RRSIG is for offline DNSKEY */
+#define DNS_RDATASLAB_WARNMASK          \
+	0x0E /*%< RRSIG(DNSKEY) expired \
+	      * warnings number mask. */
+#define DNS_RDATASLAB_WARNSHIFT               \
+	1 /*%< How many bits to shift to find \
+	   * remaining expired warning number. */
 
 /***
  *** Functions
@@ -65,7 +66,8 @@ ISC_LANG_BEGINDECLS
 
 isc_result_t
 dns_rdataslab_fromrdataset(dns_rdataset_t *rdataset, isc_mem_t *mctx,
-			   isc_region_t *region, unsigned int reservelen);
+			   isc_region_t *region, unsigned int reservelen,
+			   uint32_t limit);
 /*%<
  * Slabify a rdataset.  The slab area will be allocated and returned
  * in 'region'.
@@ -84,22 +86,6 @@ dns_rdataslab_fromrdataset(dns_rdataset_t *rdataset, isc_mem_t *mctx,
  *\li	XXX others
  */
 
-void
-dns_rdataslab_tordataset(unsigned char *slab, unsigned int reservelen,
-			 dns_rdataclass_t rdclass, dns_rdatatype_t rdtype,
-			 dns_rdatatype_t covers, dns_ttl_t ttl,
-			 dns_rdataset_t *rdataset);
-/*%<
- * Construct an rdataset from a slab.
- *
- * Requires:
- *\li	'slab' points to a slab.
- *\li	'rdataset' is disassociated.
- *
- * Ensures:
- *\li	'rdataset' is associated and points to a valid rdataest.
- */
-
 unsigned int
 dns_rdataslab_size(unsigned char *slab, unsigned int reservelen);
 /*%<
@@ -110,6 +96,15 @@ dns_rdataslab_size(unsigned char *slab, unsigned int reservelen);
  *
  * Returns:
  *\li	The number of bytes in the slab, including the reservelen.
+ */
+
+unsigned int
+dns_rdataslab_rdatasize(unsigned char *slab, unsigned int reservelen);
+/*%<
+ * Return the size of the rdata in an rdataslab.
+ *
+ * Requires:
+ *\li	'slab' points to a slab.
  */
 
 unsigned int
@@ -128,7 +123,8 @@ isc_result_t
 dns_rdataslab_merge(unsigned char *oslab, unsigned char *nslab,
 		    unsigned int reservelen, isc_mem_t *mctx,
 		    dns_rdataclass_t rdclass, dns_rdatatype_t type,
-		    unsigned int flags, unsigned char **tslabp);
+		    unsigned int flags, uint32_t maxrrperset,
+		    unsigned char **tslabp);
 /*%<
  * Merge 'oslab' and 'nslab'.
  */
@@ -174,5 +170,3 @@ dns_rdataslab_equalx(unsigned char *slab1, unsigned char *slab2,
  */
 
 ISC_LANG_ENDDECLS
-
-#endif /* DNS_RDATASLAB_H */

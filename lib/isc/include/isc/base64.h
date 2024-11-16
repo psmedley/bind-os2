@@ -1,6 +1,8 @@
 /*
  * Copyright (C) Internet Systems Consortium, Inc. ("ISC")
  *
+ * SPDX-License-Identifier: MPL-2.0
+ *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, you can obtain one at https://mozilla.org/MPL/2.0/.
@@ -9,9 +11,7 @@
  * information regarding copyright ownership.
  */
 
-
-#ifndef ISC_BASE64_H
-#define ISC_BASE64_H 1
+#pragma once
 
 /*! \file isc/base64.h */
 
@@ -25,8 +25,8 @@ ISC_LANG_BEGINDECLS
  ***/
 
 isc_result_t
-isc_base64_totext(isc_region_t *source, int wordlength,
-		  const char *wordbreak, isc_buffer_t *target);
+isc_base64_totext(isc_region_t *source, int wordlength, const char *wordbreak,
+		  isc_buffer_t *target);
 /*!<
  * \brief Convert data into base64 encoded text.
  *
@@ -96,5 +96,3 @@ isc_base64_tobuffer(isc_lex_t *lexer, isc_buffer_t *target, int length);
  */
 
 ISC_LANG_ENDDECLS
-
-#endif /* ISC_BASE64_H */

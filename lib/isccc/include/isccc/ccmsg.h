@@ -1,5 +1,7 @@
 /*
- * Portions Copyright (C) Internet Systems Consortium, Inc. ("ISC")
+ * Copyright (C) Internet Systems Consortium, Inc. ("ISC")
+ *
+ * SPDX-License-Identifier: MPL-2.0 AND ISC
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -7,8 +9,10 @@
  *
  * See the COPYRIGHT file distributed with this work for additional
  * information regarding copyright ownership.
- *
- * Portions Copyright (C) 2001 Nominum, Inc.
+ */
+
+/*
+ * Copyright (C) 2001 Nominum, Inc.
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -23,9 +27,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-
-#ifndef ISCCC_CCMSG_H
-#define ISCCC_CCMSG_H 1
+#pragma once
 
 /*! \file isccc/ccmsg.h */
 
@@ -33,39 +35,41 @@
 
 #include <isc/buffer.h>
 #include <isc/lang.h>
-#include <isc/socket.h>
+#include <isc/netmgr.h>
+#include <isc/sockaddr.h>
 
 /*% ISCCC Message Structure */
 typedef struct isccc_ccmsg {
 	/* private (don't touch!) */
-	unsigned int		magic;
-	uint32_t		size;
-	isc_buffer_t		buffer;
-	unsigned int		maxsize;
-	isc_mem_t	       *mctx;
-	isc_socket_t	       *sock;
-	isc_task_t	       *task;
-	isc_taskaction_t	action;
-	void		       *arg;
-	isc_event_t		event;
+	unsigned int	magic;
+	uint32_t	size;
+	bool		length_received;
+	isc_buffer_t   *buffer;
+	unsigned int	maxsize;
+	isc_mem_t      *mctx;
+	isc_nmhandle_t *handle;
+	isc_nm_cb_t	cb;
+	void	       *cbarg;
+	bool		reading;
 	/* public (read-only) */
-	isc_result_t		result;
-	isc_sockaddr_t		address;
+	isc_result_t result;
 } isccc_ccmsg_t;
 
 ISC_LANG_BEGINDECLS
 
 void
-isccc_ccmsg_init(isc_mem_t *mctx, isc_socket_t *sock, isccc_ccmsg_t *ccmsg);
+isccc_ccmsg_init(isc_mem_t *mctx, isc_nmhandle_t *handle, isccc_ccmsg_t *ccmsg);
 /*%
  * Associate a cc message state with a given memory context and
- * TCP socket.
+ * netmgr handle. (Note that the caller must hold a reference to
+ * the handle during asynchronous ccmsg operations; the ccmsg code
+ * does not hold the reference itself.)
  *
  * Requires:
  *
- *\li	"mctx" and "sock" be non-NULL and valid types.
+ *\li	"mctx" be a valid memory context.
  *
- *\li	"sock" be a read/write TCP socket.
+ *\li	"handle" be a netmgr handle for a stream socket.
  *
  *\li	"ccmsg" be non-NULL and an uninitialized or invalidated structure.
  *
@@ -86,9 +90,8 @@ isccc_ccmsg_setmaxsize(isccc_ccmsg_t *ccmsg, unsigned int maxsize);
  *\li	512 <= "maxsize" <= 4294967296
  */
 
-isc_result_t
-isccc_ccmsg_readmessage(isccc_ccmsg_t *ccmsg,
-		       isc_task_t *task, isc_taskaction_t action, void *arg);
+void
+isccc_ccmsg_readmessage(isccc_ccmsg_t *ccmsg, isc_nm_cb_t cb, void *cbarg);
 /*%
  * Schedule an event to be delivered when a command channel message is
  * readable, or when an error occurs on the socket.
@@ -96,13 +99,6 @@ isccc_ccmsg_readmessage(isccc_ccmsg_t *ccmsg,
  * Requires:
  *
  *\li	"ccmsg" be valid.
- *
- *\li	"task", "taskaction", and "arg" be valid.
- *
- * Returns:
- *
- *\li	#ISC_R_SUCCESS		-- no error
- *\li	Anything that the isc_socket_recv() call can return.  XXXMLG
  *
  * Notes:
  *
@@ -139,5 +135,3 @@ isccc_ccmsg_invalidate(isccc_ccmsg_t *ccmsg);
  */
 
 ISC_LANG_ENDDECLS
-
-#endif /* ISCCC_CCMSG_H */

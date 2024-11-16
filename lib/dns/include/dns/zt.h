@@ -1,6 +1,8 @@
 /*
  * Copyright (C) Internet Systems Consortium, Inc. ("ISC")
  *
+ * SPDX-License-Identifier: MPL-2.0
+ *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, you can obtain one at https://mozilla.org/MPL/2.0/.
@@ -9,32 +11,31 @@
  * information regarding copyright ownership.
  */
 
-
-#ifndef DNS_ZT_H
-#define DNS_ZT_H 1
+#pragma once
 
 /*! \file dns/zt.h */
 
 #include <stdbool.h>
 
 #include <isc/lang.h>
+#include <isc/rwlock.h>
 
 #include <dns/types.h>
 
-#define DNS_ZTFIND_NOEXACT		0x01
+#define DNS_ZTFIND_NOEXACT 0x01
+#define DNS_ZTFIND_MIRROR  0x02
 
 ISC_LANG_BEGINDECLS
 
-typedef isc_result_t
-(*dns_zt_allloaded_t)(void *arg);
+typedef isc_result_t (*dns_zt_allloaded_t)(void *arg);
 /*%<
  * Method prototype: when all pending zone loads are complete,
  * the zone table can inform the caller via a callback function with
  * this signature.
  */
 
-typedef isc_result_t
-(*dns_zt_zoneloaded_t)(dns_zt_t *zt, dns_zone_t *zone, isc_task_t *task);
+typedef isc_result_t (*dns_zt_zoneloaded_t)(dns_zt_t *zt, dns_zone_t *zone,
+					    isc_task_t *task);
 /*%<
  * Method prototype: when a zone finishes loading, the zt object
  * can be informed via a callback function with this signature.
@@ -119,14 +120,13 @@ dns_zt_detach(dns_zt_t **ztp);
  */
 
 void
-dns_zt_flushanddetach(dns_zt_t **ztp);
+dns_zt_flush(dns_zt_t *ztp);
 /*%<
- * Detach the given zonetable, if the reference count goes to zero the
- * zonetable will be flushed and then freed.  In either case 'ztp' is
- * set to NULL.
+ * Schedule flushing of the given zonetable, when reference count goes
+ * to zero.
  *
  * Requires:
- * \li	'*ztp' to be valid
+ * \li	'ztp' to be valid
  */
 
 void
@@ -140,25 +140,17 @@ dns_zt_attach(dns_zt_t *zt, dns_zt_t **ztp);
  */
 
 isc_result_t
-dns_zt_load(dns_zt_t *zt, bool stop);
+dns_zt_load(dns_zt_t *zt, bool stop, bool newonly);
 
 isc_result_t
-dns_zt_loadnew(dns_zt_t *zt, bool stop);
-
-isc_result_t
-dns_zt_asyncload(dns_zt_t *zt, dns_zt_allloaded_t alldone, void *arg);
-
-isc_result_t
-dns_zt_asyncload2(dns_zt_t *zt, dns_zt_allloaded_t alldone, void *arg,
-		  bool newonly);
+dns_zt_asyncload(dns_zt_t *zt, bool newonly, dns_zt_allloaded_t alldone,
+		 void *arg);
 /*%<
  * Load all zones in the table.  If 'stop' is true,
  * stop on the first error and return it.  If 'stop'
  * is false, ignore errors.
  *
- * dns_zt_loadnew() only loads zones that are not yet loaded.
- * dns_zt_load() also loads zones that are already loaded and
- * and whose master file has changed since the last load.
+ * if newonly is set only zones that were never loaded are loaded.
  * dns_zt_asyncload() loads zones asynchronously; when all
  * zones in the zone table have finished loaded (or failed due
  * to errors), the caller is informed by calling 'alldone'
@@ -169,20 +161,16 @@ dns_zt_asyncload2(dns_zt_t *zt, dns_zt_allloaded_t alldone, void *arg,
  */
 
 isc_result_t
-dns_zt_freezezones(dns_zt_t *zt, bool freeze);
+dns_zt_freezezones(dns_zt_t *zt, dns_view_t *view, bool freeze);
 /*%<
- * Freeze/thaw updates to master zones.
+ * Freeze/thaw updates to primary zones.
  * Any pending updates will be flushed.
  * Zones will be reloaded on thaw.
  */
 
 isc_result_t
-dns_zt_apply(dns_zt_t *zt, bool stop,
+dns_zt_apply(dns_zt_t *zt, isc_rwlocktype_t lock, bool stop, isc_result_t *sub,
 	     isc_result_t (*action)(dns_zone_t *, void *), void *uap);
-
-isc_result_t
-dns_zt_apply2(dns_zt_t *zt, bool stop, isc_result_t *sub,
-	      isc_result_t (*action)(dns_zone_t *, void *), void *uap);
 /*%<
  * Apply a given 'action' to all zone zones in the table.
  * If 'stop' is 'true' then walking the zone tree will stop if
@@ -230,5 +218,3 @@ dns_zt_setviewrevert(dns_zt_t *zt);
  */
 
 ISC_LANG_ENDDECLS
-
-#endif /* DNS_ZT_H */

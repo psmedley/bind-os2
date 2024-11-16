@@ -1,8 +1,10 @@
 /*
  * Copyright (C) Internet Systems Consortium, Inc. ("ISC")
  *
+ * SPDX-License-Identifier: MPL-2.0
+ *
  * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * License, v. 2.0.  If a copy of the MPL was not distributed with this
  * file, you can obtain one at https://mozilla.org/MPL/2.0/.
  *
  * See the COPYRIGHT file distributed with this work for additional
@@ -10,15 +12,15 @@
  */
 
 options {
-	query-source address 10.53.0.1 dscp 1;
-	notify-source 10.53.0.1 dscp 2;
-	transfer-source 10.53.0.1 dscp 3;
+	query-source address 10.53.0.1;
+	notify-source 10.53.0.1;
+	transfer-source 10.53.0.1;
 	port @PORT@;
 	pid-file "named.pid";
 	listen-on { 10.53.0.1; };
 	listen-on-v6 { none; };
 	recursion yes;
-	acache-enable yes;
+	dnssec-validation yes;
 	deny-answer-addresses { 192.0.2.0/24; 2001:db8:beef::/48; }
 		 except-from { "example.org"; };
 	deny-answer-aliases { "example.org"; }
@@ -27,6 +29,11 @@ options {
 	allow-query {!10.53.0.8; any; };
 	max-zone-ttl unlimited;
 	attach-cache "globalcache";
+	max-recursion-queries 100;
+};
+
+server 10.53.0.3 {
+	tcp-only yes;
 };
 
 server 10.42.23.3/32 {
@@ -46,7 +53,10 @@ server fd92:7065:b8e:ffff::1000 {
  * "globalcache" before the recursive "default"/IN view is configured.
  */
 view "class" chaos {
-	match-clients { none; };
+	zone "chaostest" CHAOS {
+                type primary;
+                file "chaostest.db";
+        };
 };
 
 /*
@@ -58,4 +68,13 @@ view "default" {
 		type hint;
 		file "root.hint";
 	};
+};
+
+key rndc_key {
+	secret "1234abcd8765";
+	algorithm @DEFAULT_HMAC@;
+};
+
+controls {
+	inet 10.53.0.1 port @CONTROLPORT@ allow { any; } keys { rndc_key; };
 };

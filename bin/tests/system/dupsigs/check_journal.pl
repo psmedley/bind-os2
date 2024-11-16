@@ -1,9 +1,11 @@
 #!/usr/bin/env perl
-#
+
 # Copyright (C) Internet Systems Consortium, Inc. ("ISC")
 #
+# SPDX-License-Identifier: MPL-2.0
+#
 # This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
+# License, v. 2.0.  If a copy of the MPL was not distributed with this
 # file, you can obtain one at https://mozilla.org/MPL/2.0/.
 #
 # See the COPYRIGHT file distributed with this work for additional
@@ -194,11 +196,6 @@ if( @changeset ) {
 
             if( $n_signing_keys == 0 ) {
                 print "at serial $newserial $rrsig_id went unsigned\n";
-            }
-            elsif( $rrsig_id =~ /:DNSKEY$/ ) {
-                if( $n_signing_keys != 2 ) {
-                    print "at serial $newserial $rrsig_id was signed $n_signing_keys time(s) when it should have been signed twice\n";
-                }
             }
             elsif( $n_signing_keys > 1 ) {
                 my @signing_keys = sort { $a <=> $b } keys %{ $rrsig_db{$rrsig_id} };

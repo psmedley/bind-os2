@@ -1,6 +1,8 @@
 /*
  * Copyright (C) Internet Systems Consortium, Inc. ("ISC")
  *
+ * SPDX-License-Identifier: MPL-2.0
+ *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, you can obtain one at https://mozilla.org/MPL/2.0/.
@@ -9,9 +11,7 @@
  * information regarding copyright ownership.
  */
 
-
-#ifndef DNS_OPCODE_H
-#define DNS_OPCODE_H 1
+#pragma once
 
 /*! \file dns/opcode.h */
 
@@ -21,7 +21,8 @@
 
 ISC_LANG_BEGINDECLS
 
-isc_result_t dns_opcode_totext(dns_opcode_t opcode, isc_buffer_t *target);
+isc_result_t
+dns_opcode_totext(dns_opcode_t opcode, isc_buffer_t *target);
 /*%<
  * Put a textual representation of error 'opcode' into 'target'.
  *
@@ -40,5 +41,3 @@ isc_result_t dns_opcode_totext(dns_opcode_t opcode, isc_buffer_t *target);
  */
 
 ISC_LANG_ENDDECLS
-
-#endif /* DNS_OPCODE_H */

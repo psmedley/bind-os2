@@ -1,8 +1,10 @@
 /*
  * Copyright (C) Internet Systems Consortium, Inc. ("ISC")
  *
+ * SPDX-License-Identifier: MPL-2.0
+ *
  * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * License, v. 2.0.  If a copy of the MPL was not distributed with this
  * file, you can obtain one at https://mozilla.org/MPL/2.0/.
  *
  * See the COPYRIGHT file distributed with this work for additional
@@ -30,14 +32,31 @@ options {
 
 key rndc_key {
 	secret "1234abcd8765";
-	algorithm hmac-sha256;
+	algorithm @DEFAULT_HMAC@;
+};
+
+key restart16 {
+	secret "1234abcd8765";
+	algorithm @DEFAULT_HMAC@;
 };
 
 controls {
 	inet 10.53.0.7 port @CONTROLPORT@ allow { any; } keys { rndc_key; };
 };
 
-zone "." {
-	type hint;
-	file "root.hint";
+view restart16 {
+	match-clients { key restart16; none; };
+	max-query-restarts 16;
+
+	zone "." {
+		type hint;
+		file "root.hint";
+	};
+};
+
+view default {
+	zone "." {
+		type hint;
+		file "root.hint";
+	};
 };

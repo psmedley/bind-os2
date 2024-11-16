@@ -1,6 +1,8 @@
 /*
  * Copyright (C) Internet Systems Consortium, Inc. ("ISC")
  *
+ * SPDX-License-Identifier: MPL-2.0
+ *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, you can obtain one at https://mozilla.org/MPL/2.0/.
@@ -9,9 +11,7 @@
  * information regarding copyright ownership.
  */
 
-
-#ifndef ISC_EVENTCLASS_H
-#define ISC_EVENTCLASS_H 1
+#pragma once
 
 /*! \file isc/eventclass.h
  ***** Registry of Predefined Event Type Classes
@@ -24,7 +24,7 @@
  *
  */
 
-#define ISC_EVENTCLASS(eclass)		((eclass) << 16)
+#define ISC_EVENTCLASS(eclass) ((eclass) << 16)
 
 /*@{*/
 /*!
@@ -32,15 +32,14 @@
  * Event classes >= 1024 and <= 65535 are reserved for application use.
  */
 
-#define	ISC_EVENTCLASS_TASK		ISC_EVENTCLASS(0)
-#define	ISC_EVENTCLASS_TIMER		ISC_EVENTCLASS(1)
-#define	ISC_EVENTCLASS_SOCKET		ISC_EVENTCLASS(2)
-#define	ISC_EVENTCLASS_FILE		ISC_EVENTCLASS(3)
-#define	ISC_EVENTCLASS_DNS		ISC_EVENTCLASS(4)
-#define	ISC_EVENTCLASS_APP		ISC_EVENTCLASS(5)
-#define	ISC_EVENTCLASS_OMAPI		ISC_EVENTCLASS(6)
-#define	ISC_EVENTCLASS_RATELIMITER	ISC_EVENTCLASS(7)
-#define	ISC_EVENTCLASS_ISCCC		ISC_EVENTCLASS(8)
+#define ISC_EVENTCLASS_TASK	   ISC_EVENTCLASS(0)
+#define ISC_EVENTCLASS_TIMER	   ISC_EVENTCLASS(1)
+#define ISC_EVENTCLASS_SOCKET	   ISC_EVENTCLASS(2)
+#define ISC_EVENTCLASS_FILE	   ISC_EVENTCLASS(3)
+#define ISC_EVENTCLASS_DNS	   ISC_EVENTCLASS(4)
+#define ISC_EVENTCLASS_APP	   ISC_EVENTCLASS(5)
+#define ISC_EVENTCLASS_OMAPI	   ISC_EVENTCLASS(6)
+#define ISC_EVENTCLASS_RATELIMITER ISC_EVENTCLASS(7)
+#define ISC_EVENTCLASS_ISCCC	   ISC_EVENTCLASS(8)
+#define ISC_EVENTCLASS_NS	   ISC_EVENTCLASS(9)
 /*@}*/
-
-#endif /* ISC_EVENTCLASS_H */

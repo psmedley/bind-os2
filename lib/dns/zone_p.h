@@ -1,6 +1,8 @@
 /*
  * Copyright (C) Internet Systems Consortium, Inc. ("ISC")
  *
+ * SPDX-License-Identifier: MPL-2.0
+ *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, you can obtain one at https://mozilla.org/MPL/2.0/.
@@ -9,8 +11,7 @@
  * information regarding copyright ownership.
  */
 
-#ifndef DNS_ZONE_P_H
-#define DNS_ZONE_P_H
+#pragma once
 
 #include <stdbool.h>
 
@@ -24,8 +25,8 @@
 ISC_LANG_BEGINDECLS
 
 typedef struct {
-	dns_diff_t	*diff;
-	bool	offline;
+	dns_diff_t *diff;
+	bool offline;
 } dns__zonediff_t;
 
 isc_result_t
@@ -37,10 +38,13 @@ isc_result_t
 dns__zone_updatesigs(dns_diff_t *diff, dns_db_t *db, dns_dbversion_t *version,
 		     dst_key_t *zone_keys[], unsigned int nkeys,
 		     dns_zone_t *zone, isc_stdtime_t inception,
-		     isc_stdtime_t expire, isc_stdtime_t now,
-		     bool check_ksk, bool keyset_kskonly,
+		     isc_stdtime_t expire, isc_stdtime_t keyxpire,
+		     isc_stdtime_t now, bool check_ksk, bool keyset_kskonly,
 		     dns__zonediff_t *zonediff);
 
-ISC_LANG_ENDDECLS
+isc_result_t
+dns__zone_lookup_nsec3param(dns_zone_t *zone, dns_rdata_nsec3param_t *lookup,
+			    dns_rdata_nsec3param_t *param,
+			    unsigned char saltbuf[255], bool resalt);
 
-#endif /* DNS_ZONE_P_H */
+ISC_LANG_ENDDECLS

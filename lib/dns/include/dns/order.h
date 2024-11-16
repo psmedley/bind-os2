@@ -1,6 +1,8 @@
 /*
  * Copyright (C) Internet Systems Consortium, Inc. ("ISC")
  *
+ * SPDX-License-Identifier: MPL-2.0
+ *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, you can obtain one at https://mozilla.org/MPL/2.0/.
@@ -9,9 +11,7 @@
  * information regarding copyright ownership.
  */
 
-
-#ifndef DNS_ORDER_H
-#define DNS_ORDER_H 1
+#pragma once
 
 /*! \file dns/order.h */
 
@@ -37,7 +37,7 @@ dns_order_create(isc_mem_t *mctx, dns_order_t **orderp);
  */
 
 isc_result_t
-dns_order_add(dns_order_t *order, dns_name_t *name,
+dns_order_add(dns_order_t *order, const dns_name_t *name,
 	      dns_rdatatype_t rdtype, dns_rdataclass_t rdclass,
 	      unsigned int mode);
 /*%<
@@ -55,7 +55,7 @@ dns_order_add(dns_order_t *order, dns_name_t *name,
  */
 
 unsigned int
-dns_order_find(dns_order_t *order, dns_name_t *name,
+dns_order_find(dns_order_t *order, const dns_name_t *name,
 	       dns_rdatatype_t rdtype, dns_rdataclass_t rdclass);
 /*%<
  * Find the first matching entry on the list.
@@ -88,5 +88,3 @@ dns_order_detach(dns_order_t **orderp);
  */
 
 ISC_LANG_ENDDECLS
-
-#endif /* DNS_ORDER_H */

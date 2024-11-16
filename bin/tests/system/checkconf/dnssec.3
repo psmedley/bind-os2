@@ -1,6 +1,8 @@
 /*
  * Copyright (C) Internet Systems Consortium, Inc. ("ISC")
  *
+ * SPDX-License-Identifier: MPL-2.0
+ *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, you can obtain one at https://mozilla.org/MPL/2.0/.
@@ -9,31 +11,8 @@
  * information regarding copyright ownership.
  */
 
-options {
-	dnssec-validation no;
-};
-
-view view1 {
-	match-clients { any; };
-	dnssec-enable no;
-};
-
-view view2 {
-	match-clients { none; };
-	dnssec-enable yes;
-};
-
-view view3 {
-	match-clients { none; };
-	dnssec-validation auto;
-};
-
-view view4 {
-	match-clients { none; };
-	dnssec-lookaside no;
-};
-
-view view5 {
-	match-clients { none; };
-	auto-dnssec off;
+zone "test" {
+	type primary;
+	file "test.db";
+	auto-dnssec maintain;
 };

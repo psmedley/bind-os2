@@ -1,6 +1,8 @@
 /*
  * Copyright (C) Internet Systems Consortium, Inc. ("ISC")
  *
+ * SPDX-License-Identifier: MPL-2.0
+ *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, you can obtain one at https://mozilla.org/MPL/2.0/.
@@ -9,16 +11,17 @@
  * information regarding copyright ownership.
  */
 
-#include <config.h>
-
 #include <stdbool.h>
 #include <stdlib.h>
+#include <unistd.h>
 
+#include <isc/attributes.h>
 #include <isc/buffer.h>
 #include <isc/commandline.h>
 #include <isc/lex.h>
 #include <isc/mem.h>
 #include <isc/print.h>
+#include <isc/result.h>
 #include <isc/string.h>
 #include <isc/util.h>
 
@@ -27,15 +30,14 @@
 #include <dns/rdata.h>
 #include <dns/rdataclass.h>
 #include <dns/rdatatype.h>
-#include <dns/result.h>
 
 static isc_mem_t *mctx;
 static isc_lex_t *lex;
 
 static isc_lexspecials_t specials;
 
-ISC_PLATFORM_NORETURN_PRE static void
-usage(void) ISC_PLATFORM_NORETURN_POST;
+noreturn static void
+usage(void);
 
 static void
 usage(void) {
@@ -48,11 +50,22 @@ usage(void) {
 	fprintf(stderr, "\t-P: list the supported private type names\n");
 	fprintf(stderr, "\t-T: list the supported standard type names\n");
 	fprintf(stderr, "\t-u: print the record in unknown record format\n");
-	exit(0);
+	exit(EXIT_SUCCESS);
 }
 
-ISC_PLATFORM_NORETURN_PRE static void
-fatal(const char *format, ...) ISC_PLATFORM_NORETURN_POST;
+static void
+cleanup(void) {
+	if (lex != NULL) {
+		isc_lex_close(lex);
+		isc_lex_destroy(&lex);
+	}
+	if (mctx != NULL) {
+		isc_mem_destroy(&mctx);
+	}
+}
+
+noreturn static void
+fatal(const char *format, ...);
 
 static void
 fatal(const char *format, ...) {
@@ -63,7 +76,8 @@ fatal(const char *format, ...) {
 	vfprintf(stderr, format, args);
 	va_end(args);
 	fputc('\n', stderr);
-	exit(1);
+	cleanup();
+	_exit(EXIT_FAILURE);
 }
 
 int
@@ -74,8 +88,8 @@ main(int argc, char *argv[]) {
 	unsigned int options = 0;
 	dns_rdatatype_t rdtype;
 	dns_rdataclass_t rdclass;
-	char text[256*1024];
-	char data[64*1024];
+	char text[256 * 1024];
+	char data[64 * 1024];
 	isc_buffer_t tbuf;
 	isc_buffer_t dbuf;
 	dns_rdata_t rdata = DNS_RDATA_INIT;
@@ -104,32 +118,38 @@ main(int argc, char *argv[]) {
 
 		case 'C':
 			for (t = 1; t <= 0xfeffu; t++) {
-				if (dns_rdataclass_ismeta(t))
+				if (dns_rdataclass_ismeta(t)) {
 					continue;
+				}
 				dns_rdataclass_format(t, text, sizeof(text));
-				if (strncmp(text, "CLASS", 4) != 0)
+				if (strncmp(text, "CLASS", 4) != 0) {
 					fprintf(stdout, "%s\n", text);
+				}
 			}
-			exit(0);
+			exit(EXIT_SUCCESS);
 
 		case 'P':
 			for (t = 0xff00; t <= 0xfffeu; t++) {
-				if (dns_rdatatype_ismeta(t))
+				if (dns_rdatatype_ismeta(t)) {
 					continue;
+				}
 				dns_rdatatype_format(t, text, sizeof(text));
-				if (strncmp(text, "TYPE", 4) != 0)
+				if (strncmp(text, "TYPE", 4) != 0) {
 					fprintf(stdout, "%s\n", text);
+				}
 			}
 			doexit = true;
 			break;
 
 		case 'T':
 			for (t = 1; t <= 0xfeffu; t++) {
-				if (dns_rdatatype_ismeta(t))
+				if (dns_rdatatype_ismeta(t)) {
 					continue;
+				}
 				dns_rdatatype_format(t, text, sizeof(text));
-				if (strncmp(text, "TYPE", 4) != 0)
+				if (strncmp(text, "TYPE", 4) != 0) {
 					fprintf(stdout, "%s\n", text);
+				}
 			}
 			doexit = true;
 			break;
@@ -140,15 +160,16 @@ main(int argc, char *argv[]) {
 			usage();
 
 		default:
-			fprintf(stderr, "%s: unhandled option -%c\n",
-				argv[0], isc_commandline_option);
-			exit(1);
+			fprintf(stderr, "%s: unhandled option -%c\n", argv[0],
+				isc_commandline_option);
+			exit(EXIT_FAILURE);
 		}
 	}
-	if (doexit)
-		exit(0);
+	if (doexit) {
+		exit(EXIT_SUCCESS);
+	}
 
-	RUNTIME_CHECK(isc_mem_create(0, 0, &mctx) == ISC_R_SUCCESS);
+	isc_mem_create(&mctx);
 	RUNTIME_CHECK(isc_lex_create(mctx, 256, &lex) == ISC_R_SUCCESS);
 
 	/*
@@ -169,16 +190,19 @@ main(int argc, char *argv[]) {
 		result = dns_name_fromstring(name, origin, 0, NULL);
 		if (result != ISC_R_SUCCESS) {
 			fatal("dns_name_fromstring: %s",
-			      dns_result_totext(result));
+			      isc_result_totext(result));
 		}
 	}
 
 	while ((result = isc_lex_gettoken(lex, options | ISC_LEXOPT_NUMBER,
-					  &token)) == ISC_R_SUCCESS) {
-		if (token.type == isc_tokentype_eof)
+					  &token)) == ISC_R_SUCCESS)
+	{
+		if (token.type == isc_tokentype_eof) {
 			break;
-		if (token.type == isc_tokentype_eol)
+		}
+		if (token.type == isc_tokentype_eol) {
 			continue;
+		}
 		if (once) {
 			fatal("extra data");
 		}
@@ -186,7 +210,7 @@ main(int argc, char *argv[]) {
 		 * Get class.
 		 */
 		if (token.type == isc_tokentype_number) {
-			rdclass = (dns_rdataclass_t) token.value.as_ulong;
+			rdclass = (dns_rdataclass_t)token.value.as_ulong;
 			if (token.value.as_ulong > 0xffffu) {
 				fatal("class value too big %lu",
 				      token.value.as_ulong);
@@ -196,11 +220,11 @@ main(int argc, char *argv[]) {
 				      token.value.as_ulong);
 			}
 		} else if (token.type == isc_tokentype_string) {
-			result = dns_rdataclass_fromtext(&rdclass,
-					&token.value.as_textregion);
+			result = dns_rdataclass_fromtext(
+				&rdclass, &token.value.as_textregion);
 			if (result != ISC_R_SUCCESS) {
 				fatal("dns_rdataclass_fromtext: %s",
-				      dns_result_totext(result));
+				      isc_result_totext(result));
 			}
 			if (dns_rdataclass_ismeta(rdclass)) {
 				fatal("class %.*s(%d) is a meta value",
@@ -213,18 +237,21 @@ main(int argc, char *argv[]) {
 
 		result = isc_lex_gettoken(lex, options | ISC_LEXOPT_NUMBER,
 					  &token);
-		if (result != ISC_R_SUCCESS)
+		if (result != ISC_R_SUCCESS) {
 			break;
-		if (token.type == isc_tokentype_eol)
+		}
+		if (token.type == isc_tokentype_eol) {
 			continue;
-		if (token.type == isc_tokentype_eof)
+		}
+		if (token.type == isc_tokentype_eof) {
 			break;
+		}
 
 		/*
 		 * Get type.
 		 */
 		if (token.type == isc_tokentype_number) {
-			rdtype = (dns_rdatatype_t) token.value.as_ulong;
+			rdtype = (dns_rdatatype_t)token.value.as_ulong;
 			if (token.value.as_ulong > 0xffffu) {
 				fatal("type value too big %lu",
 				      token.value.as_ulong);
@@ -234,11 +261,11 @@ main(int argc, char *argv[]) {
 				      token.value.as_ulong);
 			}
 		} else if (token.type == isc_tokentype_string) {
-			result = dns_rdatatype_fromtext(&rdtype,
-					&token.value.as_textregion);
+			result = dns_rdatatype_fromtext(
+				&rdtype, &token.value.as_textregion);
 			if (result != ISC_R_SUCCESS) {
 				fatal("dns_rdatatype_fromtext: %s",
-				      dns_result_totext(result));
+				      isc_result_totext(result));
 			}
 			if (dns_rdatatype_ismeta(rdtype)) {
 				fatal("type %.*s(%d) is a meta value",
@@ -250,11 +277,11 @@ main(int argc, char *argv[]) {
 		}
 
 		isc_buffer_init(&dbuf, data, sizeof(data));
-		result = dns_rdata_fromtext(&rdata, rdclass, rdtype, lex,
-					    name, 0, mctx, &dbuf, NULL);
+		result = dns_rdata_fromtext(&rdata, rdclass, rdtype, lex, name,
+					    0, mctx, &dbuf, NULL);
 		if (result != ISC_R_SUCCESS) {
 			fatal("dns_rdata_fromtext: %s",
-			      dns_result_totext(result));
+			      isc_result_totext(result));
 		}
 		once = true;
 	}
@@ -270,22 +297,22 @@ main(int argc, char *argv[]) {
 		result = dns_rdataclass_totext(rdclass, &tbuf);
 		if (result != ISC_R_SUCCESS) {
 			fatal("dns_rdataclass_totext: %s",
-			      dns_result_totext(result));
+			      isc_result_totext(result));
 		}
 		isc_buffer_putstr(&tbuf, "\t");
 		result = dns_rdatatype_totext(rdtype, &tbuf);
 		if (result != ISC_R_SUCCESS) {
 			fatal("dns_rdatatype_totext: %s",
-			      dns_result_totext(result));
+			      isc_result_totext(result));
 		}
 		isc_buffer_putstr(&tbuf, "\t");
 		result = dns_rdata_totext(&rdata, NULL, &tbuf);
 		if (result != ISC_R_SUCCESS) {
 			fatal("dns_rdata_totext: %s",
-			      dns_result_totext(result));
+			      isc_result_totext(result));
 		}
 
-		printf("%.*s\n", (int)tbuf.used, (char*)tbuf.base);
+		printf("%.*s\n", (int)tbuf.used, (char *)tbuf.base);
 		fflush(stdout);
 	}
 
@@ -294,29 +321,27 @@ main(int argc, char *argv[]) {
 		result = dns_rdataclass_tounknowntext(rdclass, &tbuf);
 		if (result != ISC_R_SUCCESS) {
 			fatal("dns_rdataclass_tounknowntext: %s",
-			      dns_result_totext(result));
+			      isc_result_totext(result));
 		}
 		isc_buffer_putstr(&tbuf, "\t");
 		result = dns_rdatatype_tounknowntext(rdtype, &tbuf);
 		if (result != ISC_R_SUCCESS) {
 			fatal("dns_rdatatype_tounknowntext: %s",
-			      dns_result_totext(result));
+			      isc_result_totext(result));
 		}
 		isc_buffer_putstr(&tbuf, "\t");
 		result = dns_rdata_tofmttext(&rdata, NULL,
-					     DNS_STYLEFLAG_UNKNOWNFORMAT,
-					     0, 0, "", &tbuf);
+					     DNS_STYLEFLAG_UNKNOWNFORMAT, 0, 0,
+					     "", &tbuf);
 		if (result != ISC_R_SUCCESS) {
 			fatal("dns_rdata_tofmttext: %sn",
-			      dns_result_totext(result));
+			      isc_result_totext(result));
 		}
 
-		printf("%.*s\n", (int)tbuf.used, (char*)tbuf.base);
+		printf("%.*s\n", (int)tbuf.used, (char *)tbuf.base);
 		fflush(stdout);
 	}
 
-	isc_lex_close(lex);
-	isc_lex_destroy(&lex);
-	isc_mem_destroy(&mctx);
+	cleanup();
 	return (0);
 }

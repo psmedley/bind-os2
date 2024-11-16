@@ -1,6 +1,8 @@
 /*
  * Copyright (C) Internet Systems Consortium, Inc. ("ISC")
  *
+ * SPDX-License-Identifier: MPL-2.0
+ *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, you can obtain one at https://mozilla.org/MPL/2.0/.
@@ -9,19 +11,16 @@
  * information regarding copyright ownership.
  */
 
-
 /*! \file */
 
-#include <config.h>
-
+#include "util.h"
 #include <stdarg.h>
 #include <stdbool.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 #include <isc/print.h>
-
-#include "util.h"
 
 extern bool verbose;
 extern const char *progname;
@@ -34,7 +33,7 @@ notify(const char *fmt, ...) {
 		va_start(ap, fmt);
 		vfprintf(stderr, fmt, ap);
 		va_end(ap);
-		fputs("\n", stderr);
+		fprintf(stderr, "\n");
 	}
 }
 
@@ -47,5 +46,5 @@ fatal(const char *format, ...) {
 	vfprintf(stderr, format, args);
 	va_end(args);
 	fprintf(stderr, "\n");
-	exit(1);
+	_exit(EXIT_FAILURE);
 }

@@ -1,8 +1,10 @@
 /*
  * Copyright (C) Internet Systems Consortium, Inc. ("ISC")
  *
+ * SPDX-License-Identifier: MPL-2.0
+ *
  * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * License, v. 2.0.  If a copy of the MPL was not distributed with this
  * file, you can obtain one at https://mozilla.org/MPL/2.0/.
  *
  * See the COPYRIGHT file distributed with this work for additional
@@ -18,68 +20,117 @@ options {
 	listen-on-v6 { none; };
 	recursion no;
 	notify no;
-	dnssec-enable yes;
 	session-keyfile "session.key";
 	servfail-ttl 0;
+	dnssec-validation no;
+	max-records-per-type 2050;
+	max-types-per-name 500;
 };
 
 key rndc_key {
 	secret "1234abcd8765";
-	algorithm hmac-sha256;
+	algorithm @DEFAULT_HMAC@;
 };
 
 controls {
 	inet 10.53.0.1 port @CONTROLPORT@ allow { any; } keys { rndc_key; };
 };
 
+dnssec-policy "masterformat" {
+	keys {
+		ksk key-directory lifetime unlimited algorithm @DEFAULT_ALGORITHM@;
+		zsk key-directory lifetime unlimited algorithm @DEFAULT_ALGORITHM@;
+	};
+};
+
 zone "example" {
-	type master;
+	type primary;
 	masterfile-format raw;
 	file "example.db.raw";
 };
 
 zone "compat-example" {
-	type master;
+	type primary;
 	masterfile-format raw;
 	file "example.db.compat";
 };
 
 zone "transfer1" {
-	type master;
+	type primary;
 	file "example.db";
 	allow-transfer { any; };
 };
 
 zone "transfer2" {
-	type master;
+	type primary;
 	file "example.db";
 	allow-transfer { any; };
 };
 
 zone "transfer3" {
-	type master;
+	type primary;
 	file "example.db";
 	allow-transfer { any; };
 };
 
 zone "transfer4" {
-	type master;
+	type primary;
 	file "example.db";
 	allow-transfer { any; };
 };
 
 
-zone "large" {
-	type master;
-	file "large.db.raw";
+zone "under-limit" {
+	type primary;
+	file "under-limit.db.raw";
+	masterfile-format raw;
+	allow-transfer { any; };
+};
+
+zone "under-limit-kasp" {
+	type primary;
+	file "under-limit-kasp.db.raw";
+	masterfile-format raw;
+	dnssec-policy masterformat;
+	inline-signing yes;
+	allow-transfer { any; };
+};
+
+zone "on-limit" {
+	type primary;
+	file "on-limit.db.raw";
+	masterfile-format raw;
+	allow-transfer { any; };
+};
+
+zone "on-limit-kasp" {
+	type primary;
+	file "on-limit-kasp.db.raw";
+	masterfile-format raw;
+	dnssec-policy masterformat;
+	inline-signing no;
+	allow-update { any; };
+	allow-transfer { any; };
+};
+
+zone "over-limit" {
+	type primary;
+	file "over-limit.db.raw";
+	masterfile-format raw;
+	allow-transfer { any; };
+};
+
+zone "255types" {
+	type primary;
+	file "255types.db.raw";
 	masterfile-format raw;
 	allow-transfer { any; };
 };
 
 zone "signed" {
-	type master;
-	file "signed.db.map";
-	masterfile-format map;
+	type primary;
+	file "signed.db.raw";
+	masterfile-format raw;
 	allow-transfer { any; };
 	update-policy local;
 	auto-dnssec maintain;
