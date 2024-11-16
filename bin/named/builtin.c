@@ -18,6 +18,9 @@
 
 #include <stdio.h>
 #include <string.h>
+#ifdef __OS2__
+#include <netdb.h>
+#endif
 
 #include <isc/mem.h>
 #include <isc/print.h>

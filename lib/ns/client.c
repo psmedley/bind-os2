@@ -67,6 +67,10 @@
 #include <ns/stats.h>
 #include <ns/update.h>
 
+#ifdef __OS2__
+#include <netdb.h>
+#endif
+
 /***
  *** Client
  ***/

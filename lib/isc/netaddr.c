@@ -43,6 +43,7 @@ isc_netaddr_equal(const isc_netaddr_t *a, const isc_netaddr_t *b) {
 			return (false);
 		}
 		break;
+#ifndef __OS2__
 	case AF_INET6:
 		if (memcmp(&a->type.in6, &b->type.in6, sizeof(a->type.in6)) !=
 			    0 ||
@@ -51,6 +52,7 @@ isc_netaddr_equal(const isc_netaddr_t *a, const isc_netaddr_t *b) {
 			return (false);
 		}
 		break;
+#endif
 	case AF_UNIX:
 		if (strcmp(a->type.un, b->type.un) != 0) {
 			return (false);
@@ -86,11 +88,13 @@ isc_netaddr_eqprefix(const isc_netaddr_t *a, const isc_netaddr_t *b,
 		pb = (const unsigned char *)&b->type.in;
 		ipabytes = 4;
 		break;
+#ifndef __OS2__
 	case AF_INET6:
 		pa = (const unsigned char *)&a->type.in6;
 		pb = (const unsigned char *)&b->type.in6;
 		ipabytes = 16;
 		break;
+#endif
 	default:
 		return (false);
 	}
@@ -139,9 +143,11 @@ isc_netaddr_totext(const isc_netaddr_t *netaddr, isc_buffer_t *target) {
 	case AF_INET:
 		type = &netaddr->type.in;
 		break;
+#ifndef __OS2__
 	case AF_INET6:
 		type = &netaddr->type.in6;
 		break;
+#endif
 	case AF_UNIX:
 		alen = strlen(netaddr->type.un);
 		if (alen > isc_buffer_availablelength(target)) {
@@ -225,6 +231,7 @@ isc_netaddr_prefixok(const isc_netaddr_t *na, unsigned int prefixlen) {
 			return (ISC_R_RANGE);
 		}
 		break;
+#ifndef __OS2__
 	case AF_INET6:
 		p = (const unsigned char *)&na->type.in6;
 		ipbytes = 16;
@@ -232,6 +239,7 @@ isc_netaddr_prefixok(const isc_netaddr_t *na, unsigned int prefixlen) {
 			return (ISC_R_RANGE);
 		}
 		break;
+#endif
 	default:
 		return (ISC_R_NOTIMPLEMENTED);
 	}
@@ -262,10 +270,12 @@ isc_netaddr_masktoprefixlen(const isc_netaddr_t *s, unsigned int *lenp) {
 		p = (const unsigned char *)&s->type.in;
 		ipbytes = 4;
 		break;
+#ifndef __OS2__
 	case AF_INET6:
 		p = (const unsigned char *)&s->type.in6;
 		ipbytes = 16;
 		break;
+#endif
 	default:
 		return (ISC_R_NOTIMPLEMENTED);
 	}
@@ -344,10 +354,12 @@ isc_netaddr_fromsockaddr(isc_netaddr_t *t, const isc_sockaddr_t *s) {
 		t->type.in = s->type.sin.sin_addr;
 		t->zone = 0;
 		break;
+#ifndef __OS2__
 	case AF_INET6:
 		memmove(&t->type.in6, &s->type.sin6.sin6_addr, 16);
 		t->zone = s->type.sin6.sin6_scope_id;
 		break;
+#endif
 	case AF_UNIX:
 		memmove(t->type.un, s->type.sunix.sun_path, sizeof(t->type.un));
 		t->zone = 0;
@@ -368,7 +380,9 @@ void
 isc_netaddr_any6(isc_netaddr_t *netaddr) {
 	memset(netaddr, 0, sizeof(*netaddr));
 	netaddr->family = AF_INET6;
+#ifndef __OS2__
 	netaddr->type.in6 = in6addr_any;
+#endif
 }
 
 void
@@ -382,8 +396,10 @@ isc_netaddr_ismulticast(const isc_netaddr_t *na) {
 	switch (na->family) {
 	case AF_INET:
 		return (ISC_IPADDR_ISMULTICAST(na->type.in.s_addr));
+#ifndef __OS2__
 	case AF_INET6:
 		return (IN6_IS_ADDR_MULTICAST(&na->type.in6));
+#endif
 	default:
 		return (false); /* XXXMLG ? */
 	}
@@ -404,8 +420,10 @@ isc_netaddr_islinklocal(const isc_netaddr_t *na) {
 	switch (na->family) {
 	case AF_INET:
 		return (false);
+#ifndef __OS2__
 	case AF_INET6:
 		return (IN6_IS_ADDR_LINKLOCAL(&na->type.in6));
+#endif
 	default:
 		return (false);
 	}
@@ -416,8 +434,10 @@ isc_netaddr_issitelocal(const isc_netaddr_t *na) {
 	switch (na->family) {
 	case AF_INET:
 		return (false);
+#ifndef __OS2__
 	case AF_INET6:
 		return (IN6_IS_ADDR_SITELOCAL(&na->type.in6));
+#endif
 	default:
 		return (false);
 	}
@@ -431,8 +451,10 @@ isc_netaddr_isnetzero(const isc_netaddr_t *na) {
 	switch (na->family) {
 	case AF_INET:
 		return (ISC_IPADDR_ISNETZERO(na->type.in.s_addr));
+#ifndef __OS2__
 	case AF_INET6:
 		return (false);
+#endif
 	default:
 		return (false);
 	}
@@ -445,8 +467,9 @@ isc_netaddr_fromv4mapped(isc_netaddr_t *t, const isc_netaddr_t *s) {
 	DE_CONST(s, src); /* Must come before IN6_IS_ADDR_V4MAPPED. */
 
 	REQUIRE(s->family == AF_INET6);
+#ifndef __OS2__
 	REQUIRE(IN6_IS_ADDR_V4MAPPED(&src->type.in6));
-
+#endif
 	memset(t, 0, sizeof(*t));
 	t->family = AF_INET;
 	memmove(&t->type.in, (char *)&src->type.in6 + 12, 4);
@@ -459,8 +482,10 @@ isc_netaddr_isloopback(const isc_netaddr_t *na) {
 	case AF_INET:
 		return (((ntohl(na->type.in.s_addr) & 0xff000000U) ==
 			 0x7f000000U));
+#ifndef __OS2__
 	case AF_INET6:
 		return (IN6_IS_ADDR_LOOPBACK(&na->type.in6));
+#endif
 	default:
 		return (false);
 	}

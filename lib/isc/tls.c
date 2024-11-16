@@ -948,14 +948,20 @@ isc_tlsctx_enable_peer_verification(isc_tlsctx_t *tlsctx, const bool is_server,
 
 	/* Set the hostname/IP address. */
 	if (!is_server && hostname != NULL && *hostname != '\0') {
+#ifndef __OS2__
 		struct in6_addr sa6;
+#endif
 		struct in_addr sa;
 		X509_VERIFY_PARAM *param = SSL_CTX_get0_param(tlsctx);
 		unsigned int hostflags = X509_CHECK_FLAG_NO_PARTIAL_WILDCARDS;
 
 		/* It might be an IP address. */
+#ifndef __OS2__
 		if (inet_pton(AF_INET6, hostname, &sa6) == 1 ||
 		    inet_pton(AF_INET, hostname, &sa) == 1)
+#else
+		if (inet_pton(AF_INET, hostname, &sa) == 1)
+#endif
 		{
 			ret = X509_VERIFY_PARAM_set1_ip_asc(param, hostname);
 		} else {

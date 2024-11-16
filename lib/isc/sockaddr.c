@@ -70,6 +70,7 @@ isc_sockaddr_compare(const isc_sockaddr_t *a, const isc_sockaddr_t *b,
 			return (false);
 		}
 		break;
+#ifndef __OS2__
 	case AF_INET6:
 		if ((flags & ISC_SOCKADDR_CMPADDR) != 0 &&
 		    memcmp(&a->type.sin6.sin6_addr, &b->type.sin6.sin6_addr,
@@ -95,6 +96,7 @@ isc_sockaddr_compare(const isc_sockaddr_t *a, const isc_sockaddr_t *b,
 			return (false);
 		}
 		break;
+#endif
 	default:
 		if (memcmp(&a->type, &b->type, a->length) != 0) {
 			return (false);
@@ -132,10 +134,12 @@ isc_sockaddr_totext(const isc_sockaddr_t *sockaddr, isc_buffer_t *target) {
 		snprintf(pbuf, sizeof(pbuf), "%u",
 			 ntohs(sockaddr->type.sin.sin_port));
 		break;
+#ifndef __OS2__
 	case AF_INET6:
 		snprintf(pbuf, sizeof(pbuf), "%u",
 			 ntohs(sockaddr->type.sin6.sin6_port));
 		break;
+#endif
 	case AF_UNIX:
 		plen = strlen(sockaddr->type.sunix.sun_path);
 		if (plen >= isc_buffer_availablelength(target)) {
@@ -212,8 +216,9 @@ isc_sockaddr_hash(const isc_sockaddr_t *sockaddr, bool address_only) {
 	const unsigned char *s = NULL;
 	unsigned int h = 0;
 	unsigned int p = 0;
+#ifndef __OS2__
 	const struct in6_addr *in6;
-
+#endif
 	REQUIRE(sockaddr != NULL);
 
 	switch (sockaddr->type.sa.sa_family) {
@@ -222,6 +227,7 @@ isc_sockaddr_hash(const isc_sockaddr_t *sockaddr, bool address_only) {
 		p = ntohs(sockaddr->type.sin.sin_port);
 		length = sizeof(sockaddr->type.sin.sin_addr.s_addr);
 		break;
+#ifndef __OS2__
 	case AF_INET6:
 		in6 = &sockaddr->type.sin6.sin6_addr;
 		s = (const unsigned char *)in6;
@@ -233,6 +239,7 @@ isc_sockaddr_hash(const isc_sockaddr_t *sockaddr, bool address_only) {
 		}
 		p = ntohs(sockaddr->type.sin6.sin6_port);
 		break;
+#endif
 	default:
 		UNEXPECTED_ERROR("unknown address family: %d",
 				 (int)sockaddr->type.sa.sa_family);
@@ -266,10 +273,14 @@ isc_sockaddr_any(isc_sockaddr_t *sockaddr) {
 void
 isc_sockaddr_any6(isc_sockaddr_t *sockaddr) {
 	memset(sockaddr, 0, sizeof(*sockaddr));
+#ifndef __OS2__x
 	sockaddr->type.sin6.sin6_family = AF_INET6;
+#ifndef __OS2__
 	sockaddr->type.sin6.sin6_addr = in6addr_any;
+#endif
 	sockaddr->type.sin6.sin6_port = 0;
 	sockaddr->length = sizeof(sockaddr->type.sin6);
+#endif
 	ISC_LINK_INIT(sockaddr, link);
 }
 
@@ -302,10 +313,12 @@ void
 isc_sockaddr_fromin6(isc_sockaddr_t *sockaddr, const struct in6_addr *ina6,
 		     in_port_t port) {
 	memset(sockaddr, 0, sizeof(*sockaddr));
+#ifndef __OS2__x
 	sockaddr->type.sin6.sin6_family = AF_INET6;
 	sockaddr->type.sin6.sin6_addr = *ina6;
 	sockaddr->type.sin6.sin6_port = htons(port);
 	sockaddr->length = sizeof(sockaddr->type.sin6);
+#endif
 	ISC_LINK_INIT(sockaddr, link);
 }
 
@@ -313,12 +326,14 @@ void
 isc_sockaddr_v6fromin(isc_sockaddr_t *sockaddr, const struct in_addr *ina,
 		      in_port_t port) {
 	memset(sockaddr, 0, sizeof(*sockaddr));
+#ifndef __OS2__x
 	sockaddr->type.sin6.sin6_family = AF_INET6;
 	sockaddr->type.sin6.sin6_addr.s6_addr[10] = 0xff;
 	sockaddr->type.sin6.sin6_addr.s6_addr[11] = 0xff;
 	memmove(&sockaddr->type.sin6.sin6_addr.s6_addr[12], ina, 4);
 	sockaddr->type.sin6.sin6_port = htons(port);
 	sockaddr->length = sizeof(sockaddr->type.sin6);
+#endif
 	ISC_LINK_INIT(sockaddr, link);
 }
 
@@ -357,12 +372,14 @@ isc_sockaddr_fromnetaddr(isc_sockaddr_t *sockaddr, const isc_netaddr_t *na,
 		sockaddr->type.sin.sin_addr = na->type.in;
 		sockaddr->type.sin.sin_port = htons(port);
 		break;
+#ifndef __OS2__
 	case AF_INET6:
 		sockaddr->length = sizeof(sockaddr->type.sin6);
 		memmove(&sockaddr->type.sin6.sin6_addr, &na->type.in6, 16);
 		sockaddr->type.sin6.sin6_scope_id = isc_netaddr_getzone(na);
 		sockaddr->type.sin6.sin6_port = htons(port);
 		break;
+#endif
 	default:
 		UNREACHABLE();
 	}
@@ -375,9 +392,11 @@ isc_sockaddr_setport(isc_sockaddr_t *sockaddr, in_port_t port) {
 	case AF_INET:
 		sockaddr->type.sin.sin_port = htons(port);
 		break;
+#ifndef __OS2__
 	case AF_INET6:
 		sockaddr->type.sin6.sin6_port = htons(port);
 		break;
+#endif
 	default:
 		FATAL_ERROR("unknown address family: %d",
 			    (int)sockaddr->type.sa.sa_family);
@@ -392,9 +411,11 @@ isc_sockaddr_getport(const isc_sockaddr_t *sockaddr) {
 	case AF_INET:
 		port = ntohs(sockaddr->type.sin.sin_port);
 		break;
+#ifndef __OS2__
 	case AF_INET6:
 		port = ntohs(sockaddr->type.sin6.sin6_port);
 		break;
+#endif
 	default:
 		FATAL_ERROR("unknown address family: %d",
 			    (int)sockaddr->type.sa.sa_family);
@@ -481,9 +502,11 @@ isc_sockaddr_fromsockaddr(isc_sockaddr_t *isa, const struct sockaddr *sa) {
 	case AF_INET:
 		length = sizeof(isa->type.sin);
 		break;
+#ifndef __OS2__
 	case AF_INET6:
 		length = sizeof(isa->type.sin6);
 		break;
+#endif
 	case AF_UNIX:
 		length = sizeof(isa->type.sunix);
 		break;

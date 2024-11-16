@@ -43,6 +43,9 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#ifdef __OS2__
+#include <libcx/net.h>
+#endif
 
 #include <isc/magic.h>
 #include <isc/mem.h>

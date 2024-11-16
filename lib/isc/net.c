@@ -139,6 +139,7 @@ try_proto(int domain) {
 		}
 	}
 
+#ifndef __OS2__
 	if (domain == PF_INET6) {
 		struct sockaddr_in6 sin6;
 		unsigned int len;
@@ -174,7 +175,7 @@ try_proto(int domain) {
 			}
 		}
 	}
-
+#endif
 	(void)close(s);
 
 	return (result);

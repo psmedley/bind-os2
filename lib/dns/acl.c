@@ -179,11 +179,15 @@ isc_result_t
 dns_acl_match(const isc_netaddr_t *reqaddr, const dns_name_t *reqsigner,
 	      const dns_acl_t *acl, dns_aclenv_t *env, int *match,
 	      const dns_aclelement_t **matchelt) {
+#ifndef __OS2__
 	uint16_t bitlen;
+#endif
 	isc_prefix_t pfx;
 	isc_radix_node_t *node = NULL;
+#ifndef __OS2__
 	const isc_netaddr_t *addr = reqaddr;
 	isc_netaddr_t v4addr;
+#endif
 	isc_result_t result;
 	int match_num = -1;
 	unsigned int i;
@@ -191,6 +195,7 @@ dns_acl_match(const isc_netaddr_t *reqaddr, const dns_name_t *reqsigner,
 	REQUIRE(reqaddr != NULL);
 	REQUIRE(matchelt == NULL || *matchelt == NULL);
 
+#ifndef __OS2__
 	if (env != NULL && env->match_mapped && addr->family == AF_INET6 &&
 	    IN6_IS_ADDR_V4MAPPED(&addr->type.in6))
 	{
@@ -201,7 +206,7 @@ dns_acl_match(const isc_netaddr_t *reqaddr, const dns_name_t *reqsigner,
 	/* Always match with host addresses. */
 	bitlen = (addr->family == AF_INET6) ? 128 : 32;
 	NETADDR_TO_PREFIX_T(addr, pfx, bitlen);
-
+#endif
 	/* Assume no match. */
 	*match = 0;
 
@@ -604,12 +609,13 @@ is_insecure(isc_prefix_t *prefix, void **data) {
 		return;
 	}
 
+#ifndef __OS2__
 	if (prefix->bitlen == 128 && IN6_IS_ADDR_LOOPBACK(&prefix->add.sin6) &&
 	    (data[0] == NULL || !*(bool *)data[0]))
 	{
 		return;
 	}
-
+#endif
 	/* Non-negated, non-loopback */
 	insecure_prefix_found = true; /* LOCKED */
 	return;

@@ -19,6 +19,9 @@
 #include <isc/magic.h>
 #include <isc/mutex.h>
 #include <isc/net.h>
+#ifdef __OS2__
+#include <isc/netaddr.h>
+#endif
 #include <isc/refcount.h>
 #include <isc/types.h>
 

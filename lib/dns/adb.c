@@ -925,7 +925,9 @@ import_rdataset(dns_adbname_t *adbname, dns_rdataset_t *rdataset,
 	dns_adbnamehook_t *anh = NULL;
 	dns_rdata_t rdata = DNS_RDATA_INIT;
 	struct in_addr ina;
+#ifndef __OS2__
 	struct in6_addr in6a;
+#endif
 	isc_sockaddr_t sockaddr;
 	dns_adbentry_t *foundentry = NULL; /* NO CLEAN UP! */
 	int addr_bucket;
@@ -952,11 +954,13 @@ import_rdataset(dns_adbname_t *adbname, dns_rdataset_t *rdataset,
 			memmove(&ina.s_addr, rdata.data, 4);
 			isc_sockaddr_fromin(&sockaddr, &ina, 0);
 			hookhead = &adbname->v4;
+#ifndef __OS2__
 		} else {
 			INSIST(rdata.length == 16);
 			memmove(in6a.s6_addr, rdata.data, 16);
 			isc_sockaddr_fromin6(&sockaddr, &in6a, 0);
 			hookhead = &adbname->v6;
+#endif
 		}
 
 		INSIST(nh == NULL);
@@ -3632,10 +3636,12 @@ dns_adb_dumpfind(dns_adbfind_t *find, FILE *f) {
 			tmpp = inet_ntop(AF_INET, &sa->type.sin.sin_addr, tmp,
 					 sizeof(tmp));
 			break;
+#ifndef __OS2__
 		case AF_INET6:
 			tmpp = inet_ntop(AF_INET6, &sa->type.sin6.sin6_addr,
 					 tmp, sizeof(tmp));
 			break;
+#endif
 		default:
 			tmpp = "UnkFamily";
 		}

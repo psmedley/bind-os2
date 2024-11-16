@@ -39,6 +39,10 @@
 #include <isc/types.h>
 #include <isc/util.h>
 
+#ifdef __OS2__
+#include <libcx/net.h>
+#endif
+
 /* Must follow <isc/net.h>. */
 #ifdef HAVE_NET_IF6_H
 #include <net/if6.h>
@@ -59,8 +63,9 @@
 static void
 get_addr(unsigned int family, isc_netaddr_t *dst, struct sockaddr *src,
 	 char *ifname) {
+#ifndef __OS2__
 	struct sockaddr_in6 *sa6;
-
+#endif
 #if !defined(HAVE_IF_NAMETOINDEX)
 	UNUSED(ifname);
 #endif /* if !defined(HAVE_IF_NAMETOINDEX) */
@@ -74,6 +79,7 @@ get_addr(unsigned int family, isc_netaddr_t *dst, struct sockaddr *src,
 		memmove(&dst->type.in, &((struct sockaddr_in *)src)->sin_addr,
 			sizeof(struct in_addr));
 		break;
+#ifndef __OS2__
 	case AF_INET6:
 		sa6 = (struct sockaddr_in6 *)src;
 		memmove(&dst->type.in6, &sa6->sin6_addr,
@@ -124,6 +130,7 @@ get_addr(unsigned int family, isc_netaddr_t *dst, struct sockaddr *src,
 			}
 		}
 		break;
+#endif
 	default:
 		UNREACHABLE();
 	}

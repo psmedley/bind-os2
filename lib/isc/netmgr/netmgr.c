@@ -3427,8 +3427,10 @@ isc_nm_checkaddr(const isc_sockaddr_t *addr, isc_socktype_t type) {
 	pf = isc_sockaddr_pf(addr);
 	if (pf == AF_INET) {
 		addrlen = sizeof(struct sockaddr_in);
+#ifndef __OS2__
 	} else {
 		addrlen = sizeof(struct sockaddr_in6);
+#endif
 	}
 
 	fd = socket(pf, proto, 0);

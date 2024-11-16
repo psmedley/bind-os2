@@ -21,7 +21,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-
+#ifdef __OS2__
+#include <netdb.H>
+#endif
 #ifdef HAVE_DNSTAP
 #include <fstrm.h>
 #endif
@@ -8789,10 +8791,12 @@ load_configuration(const char *filename, named_server_t *server,
 		exclusive = true;
 	}
 
+#ifndef __OS2__
 	/*
 	 * Set process limits, which (usually) needs to be done as root.
 	 */
 	set_limits(maps);
+#endif
 
 	/*
 	 * Check the process lockfile.

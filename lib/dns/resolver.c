@@ -3942,6 +3942,7 @@ possibly_mark(fetchctx_t *fctx, dns_adbaddrinfo_t *addr) {
 	} else if (isc_sockaddr_isexperimental(sa)) {
 		addr->flags |= FCTX_ADDRINFO_MARK;
 		msg = "ignoring experimental address: ";
+#ifndef __OS2__
 	} else if (sa->type.sa.sa_family != AF_INET6) {
 		return;
 	} else if (IN6_IS_ADDR_V4MAPPED(&sa->type.sin6.sin6_addr)) {
@@ -3950,6 +3951,7 @@ possibly_mark(fetchctx_t *fctx, dns_adbaddrinfo_t *addr) {
 	} else if (IN6_IS_ADDR_V4COMPAT(&sa->type.sin6.sin6_addr)) {
 		addr->flags |= FCTX_ADDRINFO_MARK;
 		msg = "ignoring IPv6 compatibility IPV4 address: ";
+#endif
 	} else {
 		return;
 	}

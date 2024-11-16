@@ -23,6 +23,14 @@
 
 #include <sys/un.h>
 
+#ifdef  __OS2__
+uint32_t htonl(uint32_t hostlong);
+uint16_t htons(uint16_t hostshort);
+uint32_t ntohl(uint32_t netlong);
+uint16_t ntohs(uint16_t netshort);
+#include <isc/netaddr.h>
+#endif
+
 /*
  * Any updates to this structure should also be applied in
  * contrib/modules/dlz/dlz_minmal.h.

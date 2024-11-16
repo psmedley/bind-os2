@@ -2332,10 +2332,14 @@ dash_option(char *option, char *next, dig_lookup_t **lookup,
 		} else {
 			srcport = 0;
 		}
+#ifndef __OS2__
 		if (have_ipv6 && inet_pton(AF_INET6, value, &in6) == 1) {
 			isc_sockaddr_fromin6(&localaddr, &in6, srcport);
 			isc_net_disableipv4();
 		} else if (have_ipv4 && inet_pton(AF_INET, value, &in4) == 1) {
+#else
+		if (have_ipv4 && inet_pton(AF_INET, value, &in4) == 1) {
+#endif
 			isc_sockaddr_fromin(&localaddr, &in4, srcport);
 			isc_net_disableipv6();
 		} else {

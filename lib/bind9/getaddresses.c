@@ -16,6 +16,9 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <string.h>
+#ifdef __OS2__
+#include <libcx/net.h>
+#endif
 
 #include <isc/net.h>
 #include <isc/netaddr.h>
@@ -147,10 +150,12 @@ again:
 			struct sockaddr_in *sin;
 			sin = (struct sockaddr_in *)tmpai->ai_addr;
 			isc_sockaddr_fromin(&addrs[i], &sin->sin_addr, port);
+#ifndef __OS2__
 		} else {
 			struct sockaddr_in6 *sin6;
 			sin6 = (struct sockaddr_in6 *)tmpai->ai_addr;
 			isc_sockaddr_fromin6(&addrs[i], &sin6->sin6_addr, port);
+#endif
 		}
 		i++;
 	}

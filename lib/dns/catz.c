@@ -35,6 +35,10 @@
 #include <dns/view.h>
 #include <dns/zone.h>
 
+#ifndef INET6_ADDRSTRLEN
+#define INET6_ADDRSTRLEN 46
+#endif /* ifndef INET6_ADDRSTRLEN */
+
 #define DNS_CATZ_ZONE_MAGIC  ISC_MAGIC('c', 'a', 't', 'z')
 #define DNS_CATZ_ZONES_MAGIC ISC_MAGIC('c', 'a', 't', 's')
 #define DNS_CATZ_ENTRY_MAGIC ISC_MAGIC('c', 'a', 't', 'e')
@@ -1433,6 +1437,7 @@ catz_process_primaries(dns_catz_zone_t *catz, dns_ipkeylist_t *ipkl,
 			isc_sockaddr_fromin(&sockaddr, &rdata_a.in_addr, 0);
 			dns_rdata_freestruct(&rdata_a);
 			break;
+#ifndef __OS2__
 		case dns_rdatatype_aaaa:
 			result = dns_rdata_tostruct(&rdata, &rdata_aaaa, NULL);
 			RUNTIME_CHECK(result == ISC_R_SUCCESS);
@@ -1440,6 +1445,7 @@ catz_process_primaries(dns_catz_zone_t *catz, dns_ipkeylist_t *ipkl,
 					     0);
 			dns_rdata_freestruct(&rdata_aaaa);
 			break;
+#endif
 		case dns_rdatatype_txt:
 			result = dns_rdata_tostruct(&rdata, &rdata_txt, NULL);
 			RUNTIME_CHECK(result == ISC_R_SUCCESS);
@@ -1548,12 +1554,14 @@ catz_process_primaries(dns_catz_zone_t *catz, dns_ipkeylist_t *ipkl,
 			isc_sockaddr_fromin(&ipkl->addrs[ipkl->count],
 					    &rdata_a.in_addr, 0);
 			dns_rdata_freestruct(&rdata_a);
+#ifndef __OS2__
 		} else {
 			result = dns_rdata_tostruct(&rdata, &rdata_aaaa, NULL);
 			RUNTIME_CHECK(result == ISC_R_SUCCESS);
 			isc_sockaddr_fromin6(&ipkl->addrs[ipkl->count],
 					     &rdata_aaaa.in6_addr, 0);
 			dns_rdata_freestruct(&rdata_aaaa);
+#endif
 		}
 		ipkl->keys[ipkl->count] = NULL;
 		ipkl->labels[ipkl->count] = NULL;
@@ -1610,8 +1618,10 @@ catz_process_apl(dns_catz_zone_t *catz, isc_buffer_t **aclbp,
 		}
 		if (apl_ent.family == 1) {
 			isc_netaddr_fromin(&addr, (struct in_addr *)buf);
+#ifndef __OS2__
 		} else if (apl_ent.family == 2) {
 			isc_netaddr_fromin6(&addr, (struct in6_addr *)buf);
+#endif
 		} else {
 			continue; /* xxxwpk log it or simply ignore? */
 		}

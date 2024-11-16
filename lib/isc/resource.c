@@ -13,6 +13,9 @@
 
 #include <inttypes.h>
 #include <stdbool.h>
+#ifdef __OS2__
+#include <sys/types.h>
+#endif
 #include <sys/resource.h>
 #include <sys/time.h> /* Required on some systems for <sys/resource.h>. */
 #include <sys/types.h>

@@ -1401,12 +1401,14 @@ named_controls_configure(named_controls_t *cp, const cfg_obj_t *config,
 				}
 				localhost.s_addr = htonl(INADDR_LOOPBACK);
 				isc_sockaddr_fromin(&addr, &localhost, 0);
+#ifndef __OS2__
 			} else {
 				if (isc_net_probeipv6() != ISC_R_SUCCESS) {
 					continue;
 				}
 				isc_sockaddr_fromin6(&addr, &in6addr_loopback,
 						     0);
+#endif
 			}
 			isc_sockaddr_setport(&addr, NAMED_CONTROL_PORT);
 

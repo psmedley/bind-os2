@@ -47,6 +47,10 @@
 
 #include <dst/dst.h>
 
+#ifndef INET6_ADDRSTRLEN
+#define INET6_ADDRSTRLEN 46
+#endif /* ifndef INET6_ADDRSTRLEN */
+
 /*
  * Incoming AXFR and IXFR.
  */

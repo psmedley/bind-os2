@@ -16,7 +16,9 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
-
+#ifdef __OS2__
+#include <libcx/net.h>
+#endif
 #include <isc/buffer.h>
 #include <isc/log.h>
 #include <isc/mem.h>

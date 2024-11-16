@@ -451,6 +451,7 @@ make_key(const dns_rrl_t *rrl, dns_rrl_key_t *key,
 		key->s.ip[0] = (client_addr->type.sin.sin_addr.s_addr &
 				rrl->ipv4_mask);
 		break;
+#ifndef __OS2__
 	case AF_INET6:
 		key->s.ipv6 = true;
 		memmove(key->s.ip, &client_addr->type.sin6.sin6_addr,
@@ -459,6 +460,7 @@ make_key(const dns_rrl_t *rrl, dns_rrl_key_t *key,
 			key->s.ip[i] &= rrl->ipv6_mask[i];
 		}
 		break;
+#endif
 	}
 }
 

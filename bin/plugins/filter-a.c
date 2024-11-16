@@ -447,11 +447,13 @@ is_v4_client(ns_client_t *client) {
 	if (isc_sockaddr_pf(&client->peeraddr) == AF_INET) {
 		return (true);
 	}
+#ifndef __OS2__
 	if (isc_sockaddr_pf(&client->peeraddr) == AF_INET6 &&
 	    IN6_IS_ADDR_V4MAPPED(&client->peeraddr.type.sin6.sin6_addr))
 	{
 		return (true);
 	}
+#endif
 	return (false);
 }
 
@@ -460,11 +462,13 @@ is_v4_client(ns_client_t *client) {
  */
 static bool
 is_v6_client(ns_client_t *client) {
+#ifndef __OS2__
 	if (isc_sockaddr_pf(&client->peeraddr) == AF_INET6 &&
 	    !IN6_IS_ADDR_V4MAPPED(&client->peeraddr.type.sin6.sin6_addr))
 	{
 		return (true);
 	}
+#endif
 	return (false);
 }
 

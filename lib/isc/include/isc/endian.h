@@ -14,7 +14,7 @@
 #pragma once
 
 #if defined(__DragonFly__) || defined(__FreeBSD__) || defined(__NetBSD__) || \
-	defined(__OpenBSD__) || defined(__bsdi__)
+	defined(__OpenBSD__) || defined(__bsdi__) || defined(__OS2__)
 
 #include <sys/endian.h>
 

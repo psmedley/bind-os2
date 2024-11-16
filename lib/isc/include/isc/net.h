@@ -76,6 +76,14 @@
 #include <sys/socket.h> /* Contractual promise. */
 #include <sys/types.h>
 
+#ifdef  __OS2__
+uint32_t htonl(uint32_t hostlong);
+uint16_t htons(uint16_t hostshort);
+uint32_t ntohl(uint32_t netlong);
+uint16_t ntohs(uint16_t netshort);
+#define IN6_IS_ADDR_V4MAPPED(x)
+#endif
+
 #ifndef IN6ADDR_LOOPBACK_INIT
 #ifdef s6_addr
 /*% IPv6 address loopback init */

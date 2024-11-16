@@ -14,6 +14,9 @@
 #pragma once
 
 #include <isc/lang.h>
+#ifdef __OS2__
+#include <isc/netaddr.h>
+#endif
 
 #include <dns/rdatastruct.h>
 #include <dns/types.h>

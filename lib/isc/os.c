@@ -18,6 +18,11 @@
 #include <isc/types.h>
 #include <isc/util.h>
 
+#ifdef __OS2__ 
+#define INCL_DOS 
+#include <os2.h> 
+#endif 
+
 #include "os_p.h"
 
 static unsigned int isc__os_ncpus = 0;
@@ -126,6 +131,11 @@ cpuset_affinity_ncpus(void) {
 
 static void
 ncpus_initialize(void) {
+#ifdef __OS2__
+	if (isc__os_ncpus <= 0) {
+        	DosQuerySysInfo(QSV_NUMPROCESSORS,QSV_NUMPROCESSORS,(PVOID)&isc__os_ncpus, sizeof(ULONG)); 
+	}
+#endif
 #if defined(HAVE_SYS_CPUSET_H) && defined(HAVE_CPUSET_GETAFFINITY)
 	if (isc__os_ncpus <= 0) {
 		isc__os_ncpus = cpuset_affinity_ncpus();

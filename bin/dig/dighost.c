@@ -1301,6 +1301,14 @@ setup_system(bool ipv4only, bool ipv6only) {
 		}
 	}
 
+#ifdef __OS2__
+        const char *env_path; 
+        env_path=getenv("ETC"); 
+        char *resolv2_path = strcat(env_path, "\\resolv2");
+#undef RESOLV_CONF
+#define RESOLV_CONF resolv2_path
+#endif
+
 	result = irs_resconf_load(mctx, RESOLV_CONF, &resconf);
 	if (result != ISC_R_SUCCESS && result != ISC_R_FILENOTFOUND) {
 		fatal("parse of %s failed", RESOLV_CONF);
@@ -3001,6 +3009,7 @@ start_tcp(dig_query_t *query) {
 		return;
 	}
 
+#ifndef __OS2__
 	if (isc_sockaddr_pf(&query->sockaddr) == AF_INET6 &&
 	    IN6_IS_ADDR_V4MAPPED(&query->sockaddr.type.sin6.sin6_addr))
 	{
@@ -3025,7 +3034,7 @@ start_tcp(dig_query_t *query) {
 		}
 		return;
 	}
-
+#endif
 	INSIST(query->handle == NULL);
 
 	if (keep != NULL && isc_sockaddr_equal(&keepaddr, &query->sockaddr)) {
@@ -3315,6 +3324,7 @@ start_udp(dig_query_t *query) {
 		return;
 	}
 
+#ifndef __OS2__
 	if (isc_sockaddr_pf(&query->sockaddr) == AF_INET6 &&
 	    IN6_IS_ADDR_V4MAPPED(&query->sockaddr.type.sin6.sin6_addr))
 	{
@@ -3334,7 +3344,7 @@ start_udp(dig_query_t *query) {
 		}
 		return;
 	}
-
+#endif
 	if (!specified_source) {
 		if ((isc_sockaddr_pf(&query->sockaddr) == AF_INET) && have_ipv4)
 		{

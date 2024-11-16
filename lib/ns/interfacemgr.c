@@ -1126,6 +1126,7 @@ do_scan(ns_interfacemgr_t *mgr, bool verbose, bool config) {
 		ipv6pktinfo = false;
 		log_explicit = true;
 	}
+#ifndef __OS2__
 	if (scan_ipv6 && ipv6only && ipv6pktinfo) {
 		for (le = ISC_LIST_HEAD(mgr->listenon6->elts); le != NULL;
 		     le = ISC_LIST_NEXT(le, link))
@@ -1165,7 +1166,7 @@ do_scan(ns_interfacemgr_t *mgr, bool verbose, bool config) {
 			/* Continue. */
 		}
 	}
-
+#endif
 	isc_netaddr_any(&zero_address);
 	isc_netaddr_any6(&zero_address6);
 

@@ -838,11 +838,13 @@ setup_system(void) {
 		ns_total = ns_alloc = (have_ipv4 ? 1 : 0) + (have_ipv6 ? 1 : 0);
 		servers = isc_mem_get(gmctx, ns_alloc * sizeof(isc_sockaddr_t));
 
+#ifndef __OS2__
 		if (have_ipv6) {
 			memset(&in6, 0, sizeof(in6));
 			in6.s6_addr[15] = 1;
 			isc_sockaddr_fromin6(&servers[0], &in6, dnsport);
 		}
+#endif
 		if (have_ipv4) {
 			in.s_addr = htonl(INADDR_LOOPBACK);
 			isc_sockaddr_fromin(&servers[(have_ipv6 ? 1 : 0)], &in,
@@ -892,6 +894,7 @@ setup_system(void) {
 					continue;
 				}
 				break;
+#ifndef __OS2__
 			case AF_INET6:
 				if (have_ipv6) {
 					sa->type.sin6.sin6_port =
@@ -900,6 +903,7 @@ setup_system(void) {
 					continue;
 				}
 				break;
+#endif
 			default:
 				fatal("bad family");
 			}
@@ -1548,12 +1552,15 @@ evaluate_local(char *cmdline) {
 		}
 	}
 
+#ifndef __OS2__
 	if (have_ipv6 && inet_pton(AF_INET6, local, &in6) == 1) {
 		if (localaddr6 == NULL) {
 			localaddr6 = isc_mem_get(gmctx, sizeof(isc_sockaddr_t));
 		}
 		isc_sockaddr_fromin6(localaddr6, &in6, (in_port_t)port);
-	} else if (have_ipv4 && inet_pton(AF_INET, local, &in4) == 1) {
+	} else 
+#endif
+	if (have_ipv4 && inet_pton(AF_INET, local, &in4) == 1) {
 		if (localaddr4 == NULL) {
 			localaddr4 = isc_mem_get(gmctx, sizeof(isc_sockaddr_t));
 		}

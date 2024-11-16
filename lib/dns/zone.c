@@ -12616,6 +12616,7 @@ notify_send_toaddr(isc_task_t *task, isc_event_t *event) {
 		goto cleanup;
 	}
 
+#ifndef __OS2__
 	/*
 	 * The raw IPv4 address should also exist.  Don't send to the
 	 * mapped form.
@@ -12630,7 +12631,7 @@ notify_send_toaddr(isc_task_t *task, isc_event_t *event) {
 		result = ISC_R_CANCELED;
 		goto cleanup;
 	}
-
+#endif
 	result = notify_createmessage(notify->zone, notify->flags, &message);
 	if (result != ISC_R_SUCCESS) {
 		goto cleanup;
@@ -15587,6 +15588,7 @@ dns_zone_notifyreceive(dns_zone_t *zone, isc_sockaddr_t *from,
 		if (isc_sockaddr_eqaddr(from, &zone->primaries[i])) {
 			break;
 		}
+#ifndef __OS2__
 		if (zone->view->aclenv->match_mapped &&
 		    IN6_IS_ADDR_V4MAPPED(&from->type.sin6.sin6_addr) &&
 		    isc_sockaddr_pf(&zone->primaries[i]) == AF_INET)
@@ -15598,6 +15600,7 @@ dns_zone_notifyreceive(dns_zone_t *zone, isc_sockaddr_t *from,
 				break;
 			}
 		}
+#endif
 	}
 
 	/*
@@ -21652,6 +21655,7 @@ checkds_send_toaddr(isc_task_t *task, isc_event_t *event) {
 		goto cleanup;
 	}
 
+#ifndef __OS2__
 	/*
 	 * The raw IPv4 address should also exist.  Don't send to the
 	 * mapped form.
@@ -21666,7 +21670,7 @@ checkds_send_toaddr(isc_task_t *task, isc_event_t *event) {
 		result = ISC_R_CANCELED;
 		goto cleanup;
 	}
-
+#endif
 	result = checkds_createmessage(checkds->zone, &message);
 	if (result != ISC_R_SUCCESS) {
 		goto cleanup;

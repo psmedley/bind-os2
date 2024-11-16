@@ -1096,7 +1096,11 @@ setup(void) {
 	/*
 	 * Check for the number of cpu's before named_os_chroot().
 	 */
+#ifndef __OS2__
 	named_g_cpus_detected = isc_os_ncpus();
+#else
+	named_g_cpus_detected = 1;
+#endif
 
 	named_os_chroot(named_g_chrootdir);
 
@@ -1116,6 +1120,7 @@ setup(void) {
 				      isc_result_totext(result));
 	}
 
+#ifndef __OS2__
 	/*
 	 * Now is the time to daemonize (if we're not running in the
 	 * foreground).  We waited until now because we wanted to get
@@ -1126,7 +1131,7 @@ setup(void) {
 	if (!named_g_foreground) {
 		named_os_daemonize();
 	}
-
+#endif
 	/*
 	 * We call isc_app_start() here as some versions of FreeBSD's fork()
 	 * destroys all the signal handling it sets up.

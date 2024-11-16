@@ -1010,13 +1010,16 @@ parse_netprefix(isc_sockaddr_t **sap, const char *value) {
 	}
 
 	sa = isc_mem_allocate(mctx, sizeof(*sa));
+#ifndef __OS2__
 	if (inet_pton(AF_INET6, buf, &in6) == 1) {
 		parsed = true;
 		isc_sockaddr_fromin6(sa, &in6, 0);
 		if (netmask > 128) {
 			netmask = 128;
 		}
-	} else if (inet_pton(AF_INET, buf, &in4) == 1) {
+	} else {
+#endif
+	if (inet_pton(AF_INET, buf, &in4) == 1) {
 		parsed = true;
 		isc_sockaddr_fromin(sa, &in4, 0);
 		if (netmask > 32) {
@@ -1748,10 +1751,13 @@ dash_option(const char *option, char *next, struct query *query, bool global,
 		} else {
 			srcport = 0;
 		}
+#ifndef __OS2__
 		if (have_ipv6 && inet_pton(AF_INET6, value, &in6) == 1) {
 			isc_sockaddr_fromin6(&srcaddr, &in6, srcport);
 			isc_net_disableipv4();
-		} else if (have_ipv4 && inet_pton(AF_INET, value, &in4) == 1) {
+		} else {
+#endif
+		if (have_ipv4 && inet_pton(AF_INET, value, &in4) == 1) {
 			isc_sockaddr_fromin(&srcaddr, &in4, srcport);
 			isc_net_disableipv6();
 		} else {

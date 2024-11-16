@@ -24,6 +24,9 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#ifdef __OS2__
+#include <libcx/net.h>
+#endif
 
 #include <isc/app.h>
 #include <isc/attributes.h>
@@ -923,6 +926,7 @@ addserver(dns_client_t *client) {
 		ISC_LINK_INIT(sa, link);
 		isc_sockaddr_fromin(sa, &in4, destport);
 		ISC_LIST_APPEND(servers, sa, link);
+#ifndef __OS2__
 	} else if (inet_pton(AF_INET6, server, &in6) == 1) {
 		if (!use_ipv6) {
 			fatal("Use of IPv6 disabled by -4");
@@ -931,6 +935,7 @@ addserver(dns_client_t *client) {
 		ISC_LINK_INIT(sa, link);
 		isc_sockaddr_fromin6(sa, &in6, destport);
 		ISC_LIST_APPEND(servers, sa, link);
+#endif
 	} else {
 		memset(&hints, 0, sizeof(hints));
 		if (!use_ipv6) {
@@ -1014,11 +1019,12 @@ findserver(dns_client_t *client) {
 			sa->type.sin.sin_port = htons(destport);
 			continue;
 		}
+#ifndef __OS2__
 		if (sa->type.sa.sa_family == AF_INET6 && use_ipv6) {
 			sa->type.sin6.sin6_port = htons(destport);
 			continue;
 		}
-
+#endif
 		/* Incompatible protocol family */
 		ISC_LIST_UNLINK(*nameservers, sa, link);
 		isc_mem_put(mctx, sa, sizeof(*sa));
@@ -1036,6 +1042,7 @@ findserver(dns_client_t *client) {
 			ISC_LIST_APPEND(*nameservers, sa, link);
 		}
 
+#ifndef __OS2__
 		if (use_ipv6) {
 			sa = isc_mem_get(mctx, sizeof(*sa));
 			isc_sockaddr_fromin6(sa, &in6addr_loopback, destport);
@@ -1043,6 +1050,7 @@ findserver(dns_client_t *client) {
 			ISC_LINK_INIT(sa, link);
 			ISC_LIST_APPEND(*nameservers, sa, link);
 		}
+#endif
 	}
 
 	result = dns_client_setservers(client, dns_rdataclass_in, NULL,
@@ -1390,6 +1398,7 @@ dash_option(char *option, char *next, bool *open_type_class) {
 			}
 			isc_sockaddr_fromin(&a4, &in4, srcport);
 			srcaddr4 = &a4;
+#ifndef __OS2__
 		} else if (inet_pton(AF_INET6, value, &in6) == 1) {
 			if (srcaddr6 != NULL) {
 				fatal("Only one local address per family "
@@ -1397,6 +1406,7 @@ dash_option(char *option, char *next, bool *open_type_class) {
 			}
 			isc_sockaddr_fromin6(&a6, &in6, srcport);
 			srcaddr6 = &a6;
+#endif
 		} else {
 			if (hash != NULL) {
 				*hash = '#';
