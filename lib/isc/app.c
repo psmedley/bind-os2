@@ -138,7 +138,10 @@ isc_app_start(void) {
 	isc_g_appctx.magic = APPCTX_MAGIC;
 	isc_g_appctx.mctx = NULL;
 	/* The remaining members will be initialized in ctxstart() */
-
+#ifdef __OS2__
+	void isc__initialize(void);
+	isc__initialize();
+#endif
 	return (isc_app_ctxstart(&isc_g_appctx));
 }
 
